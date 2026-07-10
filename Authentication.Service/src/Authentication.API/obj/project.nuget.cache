@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "suNpALkF/TA=",
+  "success": true,
+  "projectFilePath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.API\\Authentication.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.9\\microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Le package 'Microsoft.OpenApi' 2.0.0 présente une vulnérabilité de gravité élevé(e) connue, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc.",
+      "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.API\\Authentication.API.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.API\\Authentication.API.csproj",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}

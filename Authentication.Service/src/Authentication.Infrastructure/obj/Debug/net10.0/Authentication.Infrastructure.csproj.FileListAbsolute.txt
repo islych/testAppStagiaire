@@ -1,0 +1,17 @@
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Infrastructure.deps.json
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Infrastructure.dll
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Infrastructure.pdb
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Application.dll
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Domain.dll
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Application.pdb
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\bin\Debug\net10.0\Authentication.Domain.pdb
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.csproj.AssemblyReference.cache
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.AssemblyInfoInputs.cache
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.AssemblyInfo.cs
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.csproj.CoreCompileInputs.cache
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authenti.9F3EE465.Up2Date
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.dll
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\refint\Authentication.Infrastructure.dll
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\Authentication.Infrastructure.pdb
+D:\a\0stage\applicationStage\Authentication.Service\src\Authentication.Infrastructure\obj\Debug\net10.0\ref\Authentication.Infrastructure.dll
