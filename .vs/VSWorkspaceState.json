@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Authentication.Service",
+    "\\Authentication.Service\\src",
+    "\\Authentication.Service\\src\\Authentication.Application",
+    "\\Authentication.Service\\src\\Authentication.Application\\Commands",
+    "\\Authentication.Service\\src\\Authentication.Application\\DTOs",
+    "\\Candidatures.Service",
+    "\\Candidatures.Service\\src",
+    "\\Candidatures.Service\\src\\Candidatures.API",
+    "\\Candidatures.Service\\src\\Candidatures.API\\Controllers"
+  ],
+  "PreviewInSolutionExplorer": false
+}
