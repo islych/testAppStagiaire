@@ -1,0 +1,25 @@
+﻿<link rel="stylesheet" href="~/css/site.css" />
+<div class="conteneur">
+    <h2>Inscription Stagiaire</h2>
+    @if (ViewBag.Erreur != null)
+    {
+        <p style="color:red">@ViewBag.Erreur</p>
+    }
+    <form method="post">
+        <label>Nom</label><br />
+        <input type="text" name="nom" required /><br /><br />
+
+        <label>Prénom</label><br />
+        <input type="text" name="prenom" required /><br /><br />
+
+        <label>Email</label><br />
+        <input type="email" name="email" required /><br /><br />
+
+        <label>Mot de passe</label><br />
+        <input type="password" name="motDePasse" required /><br /><br />
+
+        <button type="submit">S'inscrire</button>
+    </form>
+
+    <p>Déjà un compte ? <a href="/Account/Login">Connectez-vous</a></p>
+</div>

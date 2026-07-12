@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj": {}
+    "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj": {}
   },
   "projects": {
-    "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj": {
+    "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj",
+        "projectUniqueName": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj",
         "projectName": "Authentication.Application",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\obj\\",
+        "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj",
+        "packagesPath": "C:\\Users\\Hanae\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hanae\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -33,8 +33,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj"
+              "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
+                "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj"
               }
             }
           }
@@ -349,20 +349,20 @@
         }
       }
     },
-    "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
+    "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj",
         "projectName": "Authentication.Domain",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\obj\\",
+        "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj",
+        "packagesPath": "C:\\Users\\Hanae\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hanae\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -690,20 +690,20 @@
         }
       }
     },
-    "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj": {
+    "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj",
         "projectName": "Authentication.Infrastructure",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Infrastructure\\Authentication.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Hanae\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hanae\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -719,11 +719,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj"
+              "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj": {
+                "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Application\\Authentication.Application.csproj"
               },
-              "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj"
+              "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj": {
+                "projectPath": "C:\\Users\\Hanae\\Downloads\\STAGE\\Authentication.Service\\src\\Authentication.Domain\\Authentication.Domain.csproj"
               }
             }
           }
@@ -744,6 +744,26 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
+          "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.2.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.9, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
