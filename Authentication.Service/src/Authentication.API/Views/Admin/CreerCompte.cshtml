@@ -1,0 +1,23 @@
+@{
+    ViewBag.Title = "Creer un compte";
+}
+<h2>Creer un compte</h2>
+@if (ViewBag.Success != null) { <p style="color:green">@ViewBag.Success</p> }
+@if (ViewBag.Erreur != null) { <p style="color:red">@ViewBag.Erreur</p> }
+<form method="post">
+    <p><label>Nom<br /><input type="text" name="nom" required /></label></p>
+    <p><label>Prenom<br /><input type="text" name="prenom" required /></label></p>
+    <p><label>Email<br /><input type="email" name="email" required /></label></p>
+    <p>
+        <label>Role<br />
+        <select name="roleId" required>
+            @foreach (var role in (IEnumerable<Authentication.Domain.Entities.Role>)ViewBag.Roles)
+            {
+                <option value="@role.Id">@role.Nom</option>
+            }
+        </select>
+        </label>
+    </p>
+    <button type="submit">Creer</button>
+</form>
+<p><a href="/Admin/Index">Retour</a></p>

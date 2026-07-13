@@ -1,59 +1,62 @@
 using Authentication.Infrastructure.Persistence;
+using Authentication.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AuthenticationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddControllersWithViews();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Seed des 6 rôles au démarrage
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+    var db = scope.ServiceProvider.GetRequiredService<AuthenticationDbContext>();
+    db.Database.Migrate();
+
+    var rolesRequis = new[] { "Stagiaire", "Encadrant", "Direction", "Centre", "RH", "Administrateur" };
+    foreach (var nom in rolesRequis)
+    {
+        if (!db.Roles.Any(r => r.Nom == nom))
+            db.Roles.Add(new Role { Nom = nom });
+    }
+    db.SaveChanges();
+
+    // Compte admin par défaut si aucun admin n'existe
+    var adminRole = db.Roles.First(r => r.Nom == "Administrateur");
+    if (!db.Utilisateurs.Any(u => u.RoleId == adminRole.Id))
+    {
+        db.Utilisateurs.Add(new Utilisateur
+        {
+            Nom = "Admin",
+            Prenom = "Super",
+            Email = "admin@system.com",
+            MotDePasseHash = BCrypt.Net.BCrypt.HashPassword("Admin@1234"),
+            RoleId = adminRole.Id,
+            Statut = true
+        });
+        db.SaveChanges();
+    }
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

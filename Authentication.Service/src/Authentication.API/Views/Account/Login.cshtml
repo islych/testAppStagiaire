@@ -1,19 +1,17 @@
-﻿<link rel="stylesheet" href="~/css/site.css" />
-<div class="conteneur">
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8" /><title>Connexion</title></head>
+<body>
     <h2>Connexion</h2>
-    @if (ViewBag.Erreur != null)
-    {
-        <p style="color:red">@ViewBag.Erreur</p>
-    }
+    @if (ViewBag.Erreur != null) { <p style="color:red">@ViewBag.Erreur</p> }
     <form method="post">
-        <label>Email</label><br />
-        <input type="email" name="email" required /><br /><br />
-
-        <label>Mot de passe</label><br />
-        <input type="password" name="motDePasse" required /><br /><br />
-
+        <p><label>Email<br /><input type="email" name="email" required /></label></p>
+        <p><label>Mot de passe<br /><input type="password" name="motDePasse" required /></label></p>
         <button type="submit">Se connecter</button>
     </form>
-
-    <p>Pas encore de compte ? <a href="/Account/Register">Inscrivez-vous</a></p>
-</div>
+    <p><a href="/Account/Register">Inscription Stagiaire</a></p>
+</body>
+</html>

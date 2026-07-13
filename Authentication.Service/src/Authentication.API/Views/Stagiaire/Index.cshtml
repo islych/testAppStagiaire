@@ -1,74 +1,10 @@
-﻿<link rel="stylesheet" href="~/css/site.css" />
-<link rel="stylesheet" href="~/css/stagiaire.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-<div class="stagiaire-container">
-    <div class="stagiaire-wrapper">
-        <!-- Welcome Card -->
-        <div class="welcome-card">
-            <div class="welcome-header">
-                <div class="header-content">
-                    <i class="fas fa-user-graduate icon-large"></i>
-                    <h1>Bienvenue Stagiaire</h1>
-                </div>
-            </div>
-            <div class="welcome-body">
-                <div class="success-alert">
-                    <i class="fas fa-check-circle"></i>
-                    <span><strong>@ViewBag.Nom</strong>, vous êtes connecté avec succès!</span>
-                </div>
-                <p class="dashboard-subtitle">Vous accédez à votre tableau de bord de stagiaire</p>
-            </div>
-        </div>
-
-        <!-- Quick Stats Section -->
-        <div class="stats-section">
-            <h2 class="section-title">Accès Rapide</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon profil-icon">
-                        <i class="fas fa-id-card"></i>
-                    </div>
-                    <h3>Profil</h3>
-                    <p>Gérez votre profil personnel</p>
-                    <a href="#" class="stat-btn">
-                        <span>Consulter</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon formation-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <h3>Formations</h3>
-                    <p>Voir vos formations en cours</p>
-                    <a href="#" class="stat-btn">
-                        <span>Voir</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon document-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h3>Documents</h3>
-                    <p>Accédez à vos documents</p>
-                    <a href="#" class="stat-btn">
-                        <span>Parcourir</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Action Section -->
-        <div class="action-section">
-            <a href="/" class="btn-home">
-                <i class="fas fa-home"></i>
-                Retour à l'accueil
-            </a>
-        </div>
-    </div>
-</div>
+﻿@{
+    ViewBag.Title = "Stagiaire";
+}
+<h2>Tableau de bord - Stagiaire</h2>
+<p>Bienvenue <strong>@ViewBag.Nom</strong>.</p>
+<ul>
+    <li>Mon Profil</li>
+    <li>Mes Formations</li>
+    <li>Mes Documents</li>
+</ul>

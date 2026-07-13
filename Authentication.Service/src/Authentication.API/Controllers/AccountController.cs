@@ -15,10 +15,7 @@ namespace Authentication.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
         [HttpPost]
         public async Task<IActionResult> Register(string nom, string prenom, string email, string motDePasse)
@@ -29,15 +26,9 @@ namespace Authentication.API.Controllers
                 return View();
             }
 
-            var stagiaireRole = await _context.Roles.FirstOrDefaultAsync(r => r.Nom == "Stagiaire");
-            if (stagiaireRole == null)
-            {
-                stagiaireRole = new Role { Nom = "Stagiaire" };
-                _context.Roles.Add(stagiaireRole);
-                await _context.SaveChangesAsync();
-            }
+            var stagiaireRole = await _context.Roles.FirstAsync(r => r.Nom == "Stagiaire");
 
-            var utilisateur = new Utilisateur
+            _context.Utilisateurs.Add(new Utilisateur
             {
                 Nom = nom,
                 Prenom = prenom,
@@ -45,19 +36,14 @@ namespace Authentication.API.Controllers
                 MotDePasseHash = BCrypt.Net.BCrypt.HashPassword(motDePasse),
                 RoleId = stagiaireRole.Id,
                 Statut = true
-            };
-
-            _context.Utilisateurs.Add(utilisateur);
+            });
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Login");
         }
 
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
         [HttpPost]
         public async Task<IActionResult> Login(string email, string motDePasse)
@@ -74,11 +60,32 @@ namespace Authentication.API.Controllers
 
             if (!utilisateur.Statut)
             {
-                ViewBag.Erreur = "Compte désactivé.";
+                ViewBag.Erreur = "Compte désactivé. Contactez l'administrateur.";
                 return View();
             }
 
-            return RedirectToAction("Index", "Stagiaire", new { nom = utilisateur.Prenom });
+            // Stocker la session
+            HttpContext.Session.SetInt32("UtilisateurId", utilisateur.Id);
+            HttpContext.Session.SetString("Nom", utilisateur.Prenom);
+            HttpContext.Session.SetString("Role", utilisateur.Role!.Nom);
+
+            // Redirection selon le rôle
+            return utilisateur.Role.Nom switch
+            {
+                "Stagiaire"     => RedirectToAction("Index", "Stagiaire"),
+                "Encadrant"     => RedirectToAction("Index", "Encadrant"),
+                "Direction"     => RedirectToAction("Index", "Direction"),
+                "Centre"        => RedirectToAction("Index", "Centre"),
+                "RH"            => RedirectToAction("Index", "RH"),
+                "Administrateur"=> RedirectToAction("Index", "Admin"),
+                _               => RedirectToAction("Login")
+            };
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
         }
     }
 }

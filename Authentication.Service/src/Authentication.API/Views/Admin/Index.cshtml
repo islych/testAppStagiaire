@@ -1,0 +1,36 @@
+@model List<Authentication.Domain.Entities.Utilisateur>
+@{
+    ViewBag.Title = "Admin";
+}
+<h2>Tableau de bord - Administrateur</h2>
+<p>Bienvenue <strong>@ViewBag.Nom</strong>.</p>
+@if (TempData["Erreur"] != null) { <p style="color:red">@TempData["Erreur"]</p> }
+<p><a href="/Admin/CreerCompte">+ Créer un compte</a></p>
+<table border="1" cellpadding="6">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Statut</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Prenom @u.Nom</td>
+                <td>@u.Email</td>
+                <td>@u.Role?.Nom</td>
+                <td>@(u.Statut ? "Actif" : "Inactif")</td>
+                <td>
+                    <form method="post" action="/Admin/ToggleStatut" style="display:inline">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <button type="submit">@(u.Statut ? "Désactiver" : "Activer")</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
