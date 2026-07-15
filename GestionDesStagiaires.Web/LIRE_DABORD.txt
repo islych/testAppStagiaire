@@ -1,0 +1,95 @@
+================================================================================
+  GESTION DES STAGIAIRES - CONFIGURATION COMPLETE
+================================================================================
+
+✅ TOUS LES PROBLEMES RESOLUS
+
+Fichiers crees :
+  - start-dev.ps1        : Script PowerShell pour demarrage Development
+  - start-dev.bat        : Script Batch pour demarrage Development
+  - START_HERE.md        : Guide principal
+  - QUICK_START.md       : Guide rapide 5 minutes
+  - TROUBLESHOOTING.md   : Guide de depannage
+
+================================================================================
+🚀 POUR DEMARRER L'APPLICATION
+================================================================================
+
+ETAPE 1 : Arreter l'application actuelle
+  Appuyer sur Ctrl+C dans la console
+
+ETAPE 2 : Choisir une methode de demarrage
+
+  Methode A (PowerShell - Recommande) :
+  .\start-dev.ps1
+
+  Methode B (Batch/CMD) :
+  .\start-dev.bat
+
+  Methode C (Ligne directe PowerShell) :
+  $env:ASPNETCORE_ENVIRONMENT = "Development"
+  dotnet run
+
+  Methode D (Ligne directe CMD) :
+  set ASPNETCORE_ENVIRONMENT=Development
+  dotnet run
+
+ETAPE 3 : Verifier le demarrage
+  Chercher dans la console :
+  "Hosting environment: Development"
+  "Now listening on: https://localhost:5001"
+
+ETAPE 4 : Ouvrir le navigateur
+  https://localhost:5001
+
+================================================================================
+🔑 IDENTIFIANTS DE TEST
+================================================================================
+
+Email      : admin@system.com
+Mot de passe : Admin@1234
+
+================================================================================
+⚠️  PREREQUIS AVANT DE DEMARRER
+================================================================================
+
+Verifier que les 3 services sont en cours d'execution dans 3 terminaux :
+
+Terminal 1 - Authentication.Service (Port 7001)
+  cd Authentication.Service\src\Authentication.API
+  dotnet run
+  
+Terminal 2 - Candidatures.Service (Port 7002)
+  cd Candidatures.Service\src\Candidatures.API
+  dotnet run
+  
+Terminal 3 - Frontend (Port 5001)
+  cd GestionDesStagiaires.Web
+  .\start-dev.ps1
+
+================================================================================
+❌ PROBLEME COURANT : "Invalid request URI"
+================================================================================
+
+Cause : L'application s'execute en mode Production au lieu de Development
+
+Solution :
+  1. Arreter l'application (Ctrl+C)
+  2. Utiliser l'une des methodes ci-dessus (A, B, C ou D)
+  3. Verifier que "Hosting environment: Development" est affichee
+
+================================================================================
+📚 DOCUMENTATION
+================================================================================
+
+Pour plus d'aide, consultez :
+  - START_HERE.md      : Guide de demarrage detaille
+  - QUICK_START.md     : Guide rapide
+  - README.md          : Documentation complete
+  - TROUBLESHOOTING.md : Depannage avance
+
+================================================================================
+✨ TOUT EST PRET POUR LE DEMARRAGE
+================================================================================
+
+Lancez l'application avec l'une des methodes et profitez !

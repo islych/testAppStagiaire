@@ -1,0 +1,354 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Candidatures.CreateModel
+@using GestionDesStagiaires.Web.Models.Enums
+
+@{
+    ViewData["Title"] = "Nouvelle Candidature";
+}
+
+<div class="candidature-page">
+    <!-- Bannière -->
+    <div class="candidature-banner">
+        <div class="container-fluid">
+            <div class="row py-5">
+                <div class="col-md-12">
+                    <h1 class="candidature-title">
+                        <i class="bi bi-file-earmark-plus"></i> Nouvelle Candidature
+                    </h1>
+                    <p class="candidature-subtitle">
+                        Déposez une candidature spontanée pour rejoindre notre équipe
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Carte du formulaire -->
+                <div class="card candidature-card shadow">
+                    <div class="card-body p-5">
+                        
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show candidature-alert" role="alert">
+                                <i class="bi bi-exclamation-circle"></i>
+                                <div>
+                                    <strong>Erreur</strong>
+                                    <p class="mb-0">@Model.ErrorMessage</p>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <form method="post" enctype="multipart/form-data" id="candidatureForm" novalidate>
+                            <!-- Département -->
+                            <div class="form-section mb-5">
+                                <label for="DepartementId" class="form-label candidature-label">
+                                    <i class="bi bi-building"></i> Département *
+                                </label>
+                                <select class="form-select candidature-select" id="DepartementId" 
+                                        asp-for="Candidature.DepartementId" required onchange="onDepartementChange()">
+                                    <option value="">-- Sélectionnez un département --</option>
+                                    @foreach (var dept in Model.Departements)
+                                    {
+                                        <option value="@dept.Id">@dept.Nom</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Candidature.DepartementId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Spécialité -->
+                            <div class="form-section mb-5">
+                                <label for="SpecialiteId" class="form-label candidature-label">
+                                    <i class="bi bi-diagram-3"></i> Spécialité *
+                                </label>
+                                <select class="form-select candidature-select" id="SpecialiteId" 
+                                        asp-for="Candidature.SpecialiteId" required disabled>
+                                    <option value="">-- Sélectionnez d'abord un département --</option>
+                                </select>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="bi bi-info-circle"></i> La liste des spécialités dépend du département sélectionné
+                                </small>
+                                <span asp-validation-for="Candidature.SpecialiteId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Durée de stage -->
+                            <div class="form-section mb-5">
+                                <label for="DureeStageMois" class="form-label candidature-label">
+                                    <i class="bi bi-hourglass-split"></i> Durée du stage souhaitée *
+                                </label>
+                                <select class="form-select candidature-select" id="DureeStageMois" 
+                                        asp-for="Candidature.DureeStageMois" required>
+                                    <option value="">-- Sélectionnez une durée --</option>
+                                    <option value="1">1 mois</option>
+                                    <option value="2">2 mois</option>
+                                    <option value="3">3 mois</option>
+                                    <option value="4">4 mois</option>
+                                    <option value="5">5 mois</option>
+                                    <option value="6">6 mois</option>
+                                </select>
+                                <span asp-validation-for="Candidature.DureeStageMois" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Dates de stage -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-section mb-5">
+                                        <label for="DateDebut" class="form-label candidature-label">
+                                            <i class="bi bi-calendar"></i> Date de début *
+                                        </label>
+                                        <input type="date" class="form-control" id="DateDebut" 
+                                               asp-for="Candidature.DateDebut" required />
+                                        <span asp-validation-for="Candidature.DateDebut" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-section mb-5">
+                                        <label for="DateFin" class="form-label candidature-label">
+                                            <i class="bi bi-calendar"></i> Date de fin *
+                                        </label>
+                                        <input type="date" class="form-control" id="DateFin" 
+                                               asp-for="Candidature.DateFin" required />
+                                        <small class="text-muted d-block mt-2">
+                                            <i class="bi bi-info-circle"></i> La date de fin doit correspondre à la durée sélectionnée
+                                        </small>
+                                        <span asp-validation-for="Candidature.DateFin" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Niveau d'études -->
+                            <div class="form-section mb-5">
+                                <label for="NiveauEtude" class="form-label candidature-label">
+                                    <i class="bi bi-mortarboard"></i> Niveau d'études *
+                                </label>
+                                <select class="form-select candidature-select" id="NiveauEtude" 
+                                        asp-for="Candidature.NiveauEtude" required>
+                                    <option value="">-- Sélectionnez votre niveau --</option>
+                                    <option value="Bac">Bac</option>
+                                    <option value="BacPlus2">Bac +2</option>
+                                    <option value="BacPlus3">Bac +3</option>
+                                    <option value="BacPlus4">Bac +4</option>
+                                    <option value="Ingenieur">Ingénieur</option>
+                                    <option value="Master">Master</option>
+                                    <option value="Doctorat">Doctorat</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                                <span asp-validation-for="Candidature.NiveauEtude" class="text-danger small"></span>
+                            </div>
+
+                            <!-- École -->
+                            <div class="form-section mb-5">
+                                <label for="Ecole" class="form-label candidature-label">
+                                    <i class="bi bi-building"></i> École/Université *
+                                </label>
+                                <input type="text" class="form-control" id="Ecole" 
+                                       asp-for="Candidature.Ecole" placeholder="Nom de votre école/université" required />
+                                <span asp-validation-for="Candidature.Ecole" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Lettre de motivation -->
+                            <div class="form-section mb-5">
+                                <label for="LettreMotivation" class="form-label candidature-label">
+                                    <i class="bi bi-pencil-square"></i> Lettre de motivation *
+                                </label>
+                                <textarea class="form-control" id="LettreMotivation" 
+                                          asp-for="Candidature.LettreMotivation" 
+                                          rows="6" placeholder="Expliquez votre motivation pour ce stage..." required></textarea>
+                                <small class="text-muted d-block mt-2">
+                                    <span id="lettreCount">0</span> caractères (50-2000 min-max)
+                                </small>
+                                <span asp-validation-for="Candidature.LettreMotivation" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Upload CV -->
+                            <div class="form-section mb-5">
+                                <label for="CvFile" class="form-label candidature-label">
+                                    <i class="bi bi-file-pdf"></i> Votre CV *
+                                </label>
+                                <div class="cv-upload-zone" id="cvUploadZone">
+                                    <i class="bi bi-cloud-upload"></i>
+                                    <p class="mt-2">Déposez votre CV ici</p>
+                                    <small>ou</small>
+                                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="document.getElementById('CvFile').click()">
+                                        Parcourir
+                                    </button>
+                                    <input type="file" id="CvFile" asp-for="Candidature.CvFile" 
+                                           accept=".pdf,.doc,.docx" required style="display:none;">
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="bi bi-info-circle"></i> Formats acceptés: PDF, DOC, DOCX (Max 5 MB)
+                                </small>
+                                <div id="fileInfo" class="mt-3 d-none">
+                                    <div class="alert alert-light border">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong id="fileName">Aucun fichier</strong>
+                                        <span id="fileSize" class="text-muted small"></span>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Candidature.CvFile" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="d-flex gap-3 mt-5 pt-3 border-top">
+                                <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="submitBtn">
+                                    <i class="bi bi-check-circle"></i> Envoyer la candidature
+                                </button>
+                                <a href="/candidatures" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-x-circle"></i> Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Information supplémentaire -->
+                <div class="mt-5 ps-4 pe-4">
+                    <div class="info-box">
+                        <i class="bi bi-info-circle"></i>
+                        <div>
+                            <strong>À propos de cette candidature</strong>
+                            <p class="mb-0">
+                                Votre candidature sera examinée par notre département RH. 
+                                Vous recevrez une réponse dans les 15 jours ouvrables.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Variables globales
+        const departementSelect = document.getElementById('DepartementId');
+        const specialiteSelect = document.getElementById('SpecialiteId');
+        const cvFileInput = document.getElementById('CvFile');
+        const cvUploadZone = document.getElementById('cvUploadZone');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const candidatureForm = document.getElementById('candidatureForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const lettreMotivation = document.getElementById('LettreMotivation');
+        const lettreCount = document.getElementById('lettreCount');
+
+        // Compteur de caractères pour la lettre
+        if (lettreMotivation) {
+            lettreMotivation.addEventListener('input', () => {
+                lettreCount.textContent = lettreMotivation.value.length;
+            });
+        }
+
+        // Charger les spécialités au changement de département
+        async function onDepartementChange() {
+            const departementId = departementSelect.value;
+            
+            if (!departementId) {
+                specialiteSelect.disabled = true;
+                specialiteSelect.innerHTML = '<option value="">-- Sélectionnez d\'abord un département --</option>';
+                return;
+            }
+
+            try {
+                // Appel API pour récupérer les spécialités
+                const response = await fetch(`/api/candidaturesform/specialites/${departementId}`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Erreur lors du chargement des spécialités:', response.status);
+                    specialiteSelect.innerHTML = '<option value="">Erreur lors du chargement</option>';
+                    return;
+                }
+
+                const specialitesArray = await response.json();
+
+                specialiteSelect.innerHTML = '<option value="">-- Sélectionnez une spécialité --</option>';
+                specialitesArray.forEach(spec => {
+                    const option = document.createElement('option');
+                    option.value = spec.id;
+                    option.textContent = spec.nom;
+                    specialiteSelect.appendChild(option);
+                });
+                specialiteSelect.disabled = false;
+            } catch (error) {
+                console.error('Erreur lors du chargement des spécialités:', error);
+                specialiteSelect.innerHTML = '<option value="">Erreur lors du chargement</option>';
+            }
+        }
+
+        // Gestion du drag & drop
+        cvUploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            cvUploadZone.classList.add('dragover');
+        });
+
+        cvUploadZone.addEventListener('dragleave', () => {
+            cvUploadZone.classList.remove('dragover');
+        });
+
+        cvUploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            cvUploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                cvFileInput.files = files;
+                updateFileInfo();
+            }
+        });
+
+        // Mise à jour des infos fichier
+        cvFileInput.addEventListener('change', updateFileInfo);
+
+        function updateFileInfo() {
+            if (cvFileInput.files.length > 0) {
+                const file = cvFileInput.files[0];
+                fileName.textContent = file.name;
+                fileSize.textContent = `(${(file.size / 1024).toFixed(2)} KB)`;
+                fileInfo.classList.remove('d-none');
+            } else {
+                fileInfo.classList.add('d-none');
+            }
+        }
+
+        // Validation du formulaire
+        candidatureForm.addEventListener('submit', (e) => {
+            if (!candidatureForm.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                candidatureForm.classList.add('was-validated');
+                return;
+            }
+
+            // Validation supplémentaire du fichier
+            if (!cvFileInput.files.length) {
+                e.preventDefault();
+                if (document.getElementById('cvFileError')) {
+                    document.getElementById('cvFileError').textContent = 'Veuillez sélectionner un fichier';
+                }
+                candidatureForm.classList.add('was-validated');
+                return false;
+            }
+
+            // Allow form submission if all validations pass
+            candidatureForm.classList.add('was-validated');
+        });
+
+        // Initialiser les spécialités au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            if (departementSelect.value) {
+                onDepartementChange();
+            }
+        });
+    </script>
+}

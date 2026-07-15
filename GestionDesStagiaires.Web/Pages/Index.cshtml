@@ -1,0 +1,45 @@
+@page
+@model GestionDesStagiaires.Web.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <h1 class="display-4 mb-4">Bienvenue</h1>
+                    <p class="lead mb-4">
+                        Gestion des Stagiaires - Plateforme de Candidature
+                    </p>
+                    
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <p class="text-muted mb-4">
+                            Connecté en tant que <strong>@User.Identity.Name</strong>
+                        </p>
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                            <a href="/dashboard" class="btn btn-primary btn-lg">
+                                <i class="bi bi-speedometer2"></i> Aller au Dashboard
+                            </a>
+                            <a href="/candidatures" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-file-earmark"></i> Mes Candidatures
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-4">
+                            Veuillez vous connecter pour accéder à l'application
+                        </p>
+                        <a href="/account/login" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Se Connecter
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

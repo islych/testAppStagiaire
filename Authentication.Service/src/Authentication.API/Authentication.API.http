@@ -1,6 +1,38 @@
 @Authentication.API_HostAddress = http://localhost:5174
 
-GET {{Authentication.API_HostAddress}}/weatherforecast/
+### 1. GET - Récupérer la config JWT publique
+GET {{Authentication.API_HostAddress}}/api/v1/auth/public-key-info
 Accept: application/json
+
+###
+
+### 2. POST - Login avec le compte admin par défaut
+POST {{Authentication.API_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@system.com",
+  "motDePasse": "Admin@1234"
+}
+
+###
+
+### 3. POST - Refresh Token (utilise le refreshToken reçu du login)
+POST {{Authentication.API_HostAddress}}/api/v1/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}
+
+###
+
+### 4. POST - Logout (utilise le refreshToken)
+POST {{Authentication.API_HostAddress}}/api/v1/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}
 
 ###

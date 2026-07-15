@@ -1,0 +1,139 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Account.RegisterModel
+
+@{
+    ViewData["Title"] = "Créer un compte";
+}
+
+<div class="container">
+    <div class="row justify-content-center py-4">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="bi bi-person-plus"></i> Créer un compte
+                    </h1>
+
+                    <p class="text-center text-muted mb-4">
+                        Enregistrez-vous pour accéder à la plateforme de candidature
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i> @Model.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post" id="registerForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="prenom" class="form-label">Prénom *</label>
+                                <input type="text" class="form-control" id="prenom" asp-for="NewUser.Prenom" placeholder="Jean" required>
+                                <span asp-validation-for="NewUser.Prenom" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="nom" class="form-label">Nom *</label>
+                                <input type="text" class="form-control" id="nom" asp-for="NewUser.Nom" placeholder="Dupont" required>
+                                <span asp-validation-for="NewUser.Nom" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" asp-for="NewUser.Email" placeholder="jean.dupont@example.com" required>
+                            <span asp-validation-for="NewUser.Email" class="text-danger small"></span>
+                            <small class="text-muted d-block mt-1">Vous recevrez un email de confirmation</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="motDePasse" class="form-label">Mot de passe *</label>
+                            <input type="password" class="form-control" id="motDePasse" asp-for="NewUser.MotDePasse" placeholder="••••••••" required>
+                            <span asp-validation-for="NewUser.MotDePasse" class="text-danger small"></span>
+                            <small class="text-muted d-block mt-1">Minimum 8 caractères</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmMotDePasse" class="form-label">Confirmer le mot de passe *</label>
+                            <input type="password" class="form-control" id="confirmMotDePasse" asp-for="NewUser.ConfirmMotDePasse" placeholder="••••••••" required>
+                            <span asp-validation-for="NewUser.ConfirmMotDePasse" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                 <input type="checkbox" class="form-check-input" id="acceptTerms" name="acceptTerms" value="true" required>
+                                <label class="form-check-label" for="acceptTerms">
+                                    J'accepte les <a href="#" class="text-decoration-none">conditions d'utilisation</a> *
+                                </label>
+                            </div>
+                            <span id="termsHelp" class="text-danger small d-none">Veuillez accepter les conditions d'utilisation</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+                            <i class="bi bi-person-check"></i> S'enregistrer
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Vous avez déjà un compte ? <a href="/account/login" class="text-decoration-none fw-bold">Se connecter</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4" role="alert">
+                <strong><i class="bi bi-info-circle"></i> Informations :</strong>
+                <ul class="mb-0 mt-2">
+                    <li>Votre compte sera créé en tant que Stagiaire</li>
+                    <li>Un email de confirmation vous sera envoyé</li>
+                    <li>Vous pourrez accéder à la plateforme immédiatement</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registerForm');
+            const acceptTerms = document.getElementById('acceptTerms');
+            const termsHelp = document.getElementById('termsHelp');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Valider la checkbox
+            if (form && acceptTerms) {
+                form.addEventListener('submit', function(e) {
+                    if (!acceptTerms.checked) {
+                        e.preventDefault();
+                        termsHelp.classList.remove('d-none');
+                        acceptTerms.focus();
+                        return false;
+                    }
+                    termsHelp.classList.add('d-none');
+                });
+
+                // Masquer le message d'erreur quand la checkbox est cochée
+                acceptTerms.addEventListener('change', function() {
+                    if (this.checked) {
+                        termsHelp.classList.add('d-none');
+                    }
+                });
+            }
+        });
+    </script>
+}

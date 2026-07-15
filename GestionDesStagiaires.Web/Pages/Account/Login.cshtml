@@ -1,0 +1,75 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Account.LoginModel
+
+@{
+    ViewData["Title"] = "Connexion";
+}
+
+<div class="container">
+    <div class="row justify-content-center py-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="card-title text-center mb-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Connexion
+                    </h1>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="votre.email@example.com" required>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="motDePasse" class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control" id="motDePasse" name="motDePasse" placeholder="••••••••" required>
+                            <span asp-validation-for="MotDePasse" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Se souvenir de moi
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Se Connecter
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center mb-3">
+                        <small class="text-muted">
+                            Pas encore de compte ? <a href="/account/register" class="text-decoration-none fw-bold">S'enregistrer</a>
+                        </small>
+                    </div>
+
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Besoin d'aide ? <a href="#" class="text-decoration-none">Contactez le support</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4 text-center" role="alert">
+                <strong>Démonstration :</strong> Utilisez vos identifiants de l'Authentication.Service
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

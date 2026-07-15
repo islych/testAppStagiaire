@@ -1,0 +1,124 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Candidatures.IndexModel
+
+@{
+    ViewData["Title"] = "Mes Candidatures";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1>
+                <i class="bi bi-file-earmark"></i> Mes Candidatures
+            </h1>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="/candidatures/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouvelle Candidature
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Candidatures.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> Vous n'avez pas encore de candidature. <a href="/candidatures/create" class="alert-link">En créer une</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Département</th>
+                        <th>Spécialité</th>
+                        <th>Période</th>
+                        <th>Niveau</th>
+                        <th>École</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var candidature in Model.Candidatures)
+                    {
+                        var statusBadge = candidature.Statut switch
+                        {
+                            "EnAttente" => "bg-warning",
+                            "Acceptee" => "bg-success",
+                            "Refusee" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+
+                        var statusLabel = candidature.Statut switch
+                        {
+                            "EnAttente" => "En attente",
+                            "Acceptee" => "Acceptée",
+                            "Refusee" => "Refusée",
+                            _ => candidature.Statut
+                        };
+
+                        var periodeLabel = $"{candidature.DureeStageMois} mois";
+
+                        var niveauLabel = candidature.NiveauEtude.ToString() switch
+                        {
+                            "Bac" => "Bac",
+                            "BacPlus2" => "Bac +2",
+                            "BacPlus3" => "Bac +3",
+                            "BacPlus4" => "Bac +4",
+                            "Ingenieur" => "Ing",
+                            "Master" => "Master",
+                            "Doctorat" => "Doc",
+                            "Autre" => "Autre",
+                            _ => candidature.NiveauEtude.ToString()
+                        };
+
+                        <tr>
+                            <td>
+                                <span title="@candidature.DepartementNom">
+                                    @(string.IsNullOrEmpty(candidature.DepartementNom) ? "ID: " + candidature.DepartementId : candidature.DepartementNom)
+                                </span>
+                            </td>
+                            <td>
+                                <span title="@candidature.SpecialiteNom">
+                                    @(string.IsNullOrEmpty(candidature.SpecialiteNom) ? "ID: " + candidature.SpecialiteId : candidature.SpecialiteNom)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">@periodeLabel</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">@niveauLabel</span>
+                            </td>
+                            <td>
+                                <small>@candidature.Ecole</small>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadge">@statusLabel</span>
+                            </td>
+                            <td>@candidature.DateCreation.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <a href="/candidatures/details/@candidature.Id" class="btn btn-sm btn-outline-primary" title="Détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="/candidatures/suivi/@candidature.Id" class="btn btn-sm btn-outline-info" title="Suivi">
+                                    <i class="bi bi-graph-up"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

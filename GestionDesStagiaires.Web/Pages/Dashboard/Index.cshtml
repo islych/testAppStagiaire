@@ -1,0 +1,238 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Dashboard.IndexModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Utilisateur";
+}
+
+@if (userRole == "Administrateur")
+{
+    <!-- Interface Admin -->
+    <div class="container-fluid mt-4">
+        <h1 class="mb-4">
+            <i class="bi bi-shield-lock"></i> Tableau de Bord - Administrateur
+        </h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-person-circle"></i> Profil
+                        </h5>
+                        <p class="card-text">
+                            <strong>Bienvenue @User.Identity?.Name !</strong>
+                        </p>
+                        <dl class="row">
+                            <dt class="col-sm-3">Email :</dt>
+                            <dd class="col-sm-9">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</dd>
+
+                            <dt class="col-sm-3">Rôle :</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-danger">@userRole</span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-people display-4 text-primary mb-3"></i>
+                                <h5 class="card-title">Gestion des Utilisateurs</h5>
+                                <p class="card-text text-muted">Créer et gérer les utilisateurs</p>
+                                <a href="/Admin" class="btn btn-primary btn-sm">
+                                    Accéder
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-earmark display-4 text-info mb-3"></i>
+                                <h5 class="card-title">Rapports</h5>
+                                <p class="card-text text-muted">Consulter les rapports système</p>
+                                <button class="btn btn-info btn-sm" disabled>
+                                    À venir
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-shield-check"></i> Permissions Admin
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3">Vous avez accès à :</h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Gestion des utilisateurs</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Attribution des rôles</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Activation/Désactivation</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clock text-warning"></i>
+                                <strong>Audit logs</strong> <span class="badge bg-info">Soon</span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clock text-warning"></i>
+                                <strong>Configuration système</strong> <span class="badge bg-info">Soon</span>
+                            </li>
+                        </ul>
+
+                        <hr>
+
+                        <p class="small text-muted mb-0">
+                            <i class="bi bi-shield-exclamation"></i> Ces permissions vous permettent de gérer l'ensemble du système.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Interface Utilisateur Standard -->
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">
+                <i class="bi bi-speedometer2"></i> Tableau de Bord
+            </h1>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-circle"></i> Profil
+                    </h5>
+                    <p class="card-text">
+                        <strong>Bienvenue @User.Identity?.Name !</strong>
+                    </p>
+                    <dl class="row">
+                        <dt class="col-sm-3">Email :</dt>
+                        <dd class="col-sm-9">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</dd>
+
+                        <dt class="col-sm-3">Rôle :</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-primary">@userRole</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-earmark display-4 text-primary mb-3"></i>
+                            <h5 class="card-title">Mes Candidatures</h5>
+                            <p class="card-text text-muted">Consulter et gérer vos candidatures</p>
+                            <a href="/candidatures" class="btn btn-primary btn-sm">
+                                Aller
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <i class="bi bi-plus-circle display-4 text-success mb-3"></i>
+                            <h5 class="card-title">Nouvelle Candidature</h5>
+                            <p class="card-text text-muted">Déposer une nouvelle candidature</p>
+                            <a href="/candidatures/create" class="btn btn-success btn-sm">
+                                Créer
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 opacity-50">
+                        <div class="card-body text-center">
+                            <i class="bi bi-file-pdf display-4 text-secondary mb-3"></i>
+                            <h5 class="card-title">Documents</h5>
+                            <span class="badge bg-info">À venir</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 opacity-50">
+                        <div class="card-body text-center">
+                            <i class="bi bi-briefcase display-4 text-secondary mb-3"></i>
+                            <h5 class="card-title">Stages</h5>
+                            <span class="badge bg-info">À venir</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Informations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">
+                        Cette plateforme vous permet de gérer vos candidatures de stage de manière simple et efficace.
+                    </p>
+
+                    <hr>
+
+                    <h6 class="card-subtitle mb-2">Services disponibles :</h6>
+                    <ul class="list-unstyled small">
+                        <li>
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>Candidatures</strong>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock text-warning"></i>
+                            <strong>Documents</strong> <span class="badge bg-info">Soon</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock text-warning"></i>
+                            <strong>Stages</strong> <span class="badge bg-info">Soon</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-clock text-warning"></i>
+                            <strong>Notifications</strong> <span class="badge bg-info">Soon</span>
+                        </li>
+                    </ul>
+
+                    <hr>
+
+                    <p class="small text-muted mb-0">
+                        <i class="bi bi-question-circle"></i> Besoin d'aide ? <a href="#" class="text-decoration-none">Contactez le support</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}

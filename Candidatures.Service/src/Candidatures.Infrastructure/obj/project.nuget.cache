@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vu3p+zWONlA=",
+  "dgSpecHash": "QT2RtrrfvV4=",
   "success": true,
-  "projectFilePath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
+  "projectFilePath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\user\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\user\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

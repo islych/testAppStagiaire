@@ -1,0 +1,16 @@
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\bin\Development\net10.0\Candidatures.Domain.deps.json
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\bin\Development\net10.0\Candidatures.Domain.dll
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\bin\Development\net10.0\Candidatures.Domain.pdb
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\bin\Development\net10.0\Shared.Kernel.dll
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\bin\Development\net10.0\Shared.Kernel.pdb
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.csproj.AssemblyReference.cache
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.AssemblyInfoInputs.cache
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.AssemblyInfo.cs
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.csproj.CoreCompileInputs.cache
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.sourcelink.json
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidat.4AD77CD7.Up2Date
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.dll
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\refint\Candidatures.Domain.dll
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\Candidatures.Domain.pdb
+D:\a\0stage\app2\gestionDesStagiaires\Candidatures.Service\src\Candidatures.Domain\obj\Development\net10.0\ref\Candidatures.Domain.dll

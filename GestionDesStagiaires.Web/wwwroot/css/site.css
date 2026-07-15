@@ -1,0 +1,865 @@
+/* Site CSS - Palette Simple Noire et Bleue */
+
+:root {
+    /* Palette principale */
+    --primary-blue: #0066cc;
+    --dark-blue: #003d99;
+    --light-blue: #e6f0ff;
+    --very-light-blue: #f0f6ff;
+    
+    /* Palette noire */
+    --dark-black: #1a1a1a;
+    --dark-gray: #333333;
+    --medium-gray: #666666;
+    --light-gray: #f5f5f5;
+    
+    /* Palette utilitaire */
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0066cc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--light-gray);
+    color: var(--dark-black);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+main {
+    flex: 1;
+    padding: 20px 0;
+}
+
+/* ============ NAVBAR ============ */
+.navbar {
+    background-color: var(--dark-black) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-size: 18px;
+    font-weight: 600;
+    color: white !important;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: color 0.2s ease;
+    font-size: 14px;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: white !important;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--primary-blue) !important;
+}
+
+.dropdown-menu {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    color: var(--dark-black);
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+}
+
+.dropdown-divider {
+    border-color: #e0e0e0;
+}
+
+/* ============ CARDS ============ */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: var(--primary-blue);
+    border-color: var(--dark-blue);
+    color: white;
+    font-weight: 600;
+    border-radius: 4px 4px 0 0;
+}
+
+.card-body {
+    padding: 16px;
+    background-color: white;
+}
+
+.card-title {
+    color: var(--dark-black);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.card-text {
+    color: var(--medium-gray);
+    margin-bottom: 8px;
+}
+
+/* ============ BUTTONS ============ */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    padding: 8px 16px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    border-color: var(--dark-blue);
+}
+
+.btn-secondary {
+    background-color: var(--dark-gray);
+    border-color: var(--dark-gray);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--medium-gray);
+    border-color: var(--medium-gray);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: black;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* ============ FORMS ============ */
+.form-label {
+    font-weight: 500;
+    color: var(--dark-black);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px var(--light-blue);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--medium-gray);
+}
+
+/* ============ TABLES ============ */
+.table {
+    background-color: white;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: var(--primary-blue);
+    color: white;
+    font-weight: 600;
+}
+
+.table thead th {
+    border: none;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: var(--light-blue);
+}
+
+.table-responsive {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* ============ BADGES ============ */
+.badge {
+    font-weight: 600;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+.bg-primary {
+    background-color: var(--primary-blue) !important;
+}
+
+.bg-secondary {
+    background-color: var(--dark-gray) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+.text-dark {
+    color: var(--dark-black) !important;
+}
+
+.text-muted {
+    color: var(--medium-gray) !important;
+}
+
+/* ============ ALERTS ============ */
+.alert {
+    border-radius: 4px;
+    border: 1px solid;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+}
+
+.alert-info {
+    background-color: var(--very-light-blue);
+    border-color: var(--light-blue);
+    color: var(--dark-blue);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert-dismissible .btn-close {
+    padding: 0.5rem;
+}
+
+/* ============ FOOTER ============ */
+footer {
+    background-color: var(--dark-black);
+    color: white;
+    border-top: 2px solid var(--primary-blue);
+    margin-top: auto;
+    padding: 16px 0;
+}
+
+footer p, footer small {
+    margin-bottom: 4px;
+}
+
+footer a {
+    color: var(--light-blue);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: white;
+}
+
+/* ============ TYPOGRAPHY ============ */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--dark-black);
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+h4 { font-size: 18px; }
+h5 { font-size: 16px; }
+h6 { font-size: 14px; }
+
+a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--dark-blue);
+    text-decoration: underline;
+}
+
+/* ============ UTILITIES ============ */
+.container, .container-fluid {
+    max-width: 1200px;
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.btn-group-sm .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ============ STATUS MESSAGES ============ */
+.status-message {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============ SPINNER ============ */
+.spinner-border {
+    color: var(--primary-blue);
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    body {
+        font-size: 13px;
+    }
+
+    main {
+        padding: 12px 0;
+    }
+
+    .navbar-brand {
+        font-size: 16px;
+    }
+
+    .card {
+        margin-bottom: 12px;
+    }
+
+    .card-body {
+        padding: 12px;
+    }
+
+    h1 { font-size: 24px; }
+    h2 { font-size: 20px; }
+    h3 { font-size: 18px; }
+
+    .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .table {
+        font-size: 12px;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 8px;
+    }
+
+    .dropdown-menu {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 14px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    h1 { font-size: 20px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+}
+
+/* ============ PRINT ============ */
+@media print {
+    .navbar,
+    footer,
+    .btn,
+    .btn-outline-secondary {
+        display: none;
+    }
+
+    body {
+        background-color: white;
+        flex-direction: column;
+    }
+
+    .card {
+        page-break-inside: avoid;
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+}
+
+/* ============ CANDIDATURE FORM ============ */
+.candidature-page {
+    background-color: white;
+}
+
+.candidature-banner {
+    background: linear-gradient(135deg, var(--dark-black) 0%, var(--dark-blue) 100%);
+    color: white;
+    border-bottom: 4px solid var(--primary-blue);
+}
+
+.candidature-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.candidature-title i {
+    margin-right: 12px;
+    font-size: 36px;
+}
+
+.candidature-subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.candidature-card {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+
+.candidature-card .card-body {
+    padding: 40px;
+}
+
+.form-section {
+    margin-bottom: 24px;
+}
+
+.form-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.candidature-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark-black);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.candidature-label i {
+    margin-right: 8px;
+    color: var(--primary-blue);
+    font-size: 16px;
+}
+
+.candidature-select,
+.form-select {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.candidature-select:focus,
+.form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px var(--light-blue);
+    outline: none;
+}
+
+.candidature-select:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* File Upload Zone */
+.cv-upload-zone {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #fafafa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cv-upload-zone:hover {
+    border-color: var(--primary-blue);
+    background-color: var(--very-light-blue);
+}
+
+.cv-upload-zone.dragover {
+    border-color: var(--primary-blue);
+    background-color: var(--light-blue);
+    box-shadow: 0 0 0 4px var(--very-light-blue);
+}
+
+.cv-upload-zone i {
+    font-size: 32px;
+    color: var(--primary-blue);
+    margin-bottom: 12px;
+}
+
+.cv-upload-zone p {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    color: var(--dark-black);
+}
+
+.cv-upload-zone small {
+    color: var(--medium-gray);
+}
+
+#fileInfo {
+    margin-top: 16px;
+}
+
+#fileInfo .alert {
+    margin-bottom: 0;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+}
+
+#fileInfo i {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+#fileInfo strong {
+    margin-right: 8px;
+}
+
+.info-box {
+    background-color: var(--very-light-blue);
+    border: 1px solid var(--light-blue);
+    border-radius: 6px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.info-box i {
+    font-size: 20px;
+    color: var(--primary-blue);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.info-box strong {
+    display: block;
+    color: var(--dark-black);
+    margin-bottom: 4px;
+}
+
+.info-box p {
+    margin: 0;
+    color: var(--dark-gray);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.candidature-alert {
+    border-radius: 6px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.candidature-alert i {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.candidature-alert div {
+    flex: 1;
+}
+
+.candidature-alert strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.candidature-alert p {
+    margin: 0;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.btn-lg i {
+    margin-right: 8px;
+}
+
+.btn-outline-secondary {
+    border-color: var(--dark-gray);
+    color: var(--dark-gray);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--dark-gray);
+    color: white;
+    border-color: var(--dark-gray);
+}
+
+/* Validation States */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--danger-color);
+    box-shadow: none;
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+    display: block;
+    color: var(--danger-color);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.was-validated .form-control:invalid ~ .invalid-feedback,
+.was-validated .form-select:invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* ============ RESPONSIVE - CANDIDATURE FORM ============ */
+@media (max-width: 768px) {
+    .candidature-banner {
+        padding: 20px 0 !important;
+    }
+
+    .candidature-title {
+        font-size: 24px;
+    }
+
+    .candidature-title i {
+        font-size: 28px;
+        margin-right: 8px;
+    }
+
+    .candidature-subtitle {
+        font-size: 14px;
+    }
+
+    .candidature-card .card-body {
+        padding: 24px;
+    }
+
+    .form-section {
+        margin-bottom: 18px;
+    }
+
+    .cv-upload-zone {
+        padding: 30px 15px;
+        min-height: 100px;
+    }
+
+    .cv-upload-zone i {
+        font-size: 28px;
+    }
+
+    .d-flex.gap-3 {
+        flex-direction: column;
+    }
+
+    .d-flex.gap-3 .btn {
+        width: 100%;
+    }
+
+    .flex-grow-1 {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .candidature-title {
+        font-size: 20px;
+    }
+
+    .candidature-title i {
+        font-size: 24px;
+    }
+
+    .candidature-subtitle {
+        font-size: 13px;
+    }
+
+    .candidature-card .card-body {
+        padding: 16px;
+    }
+
+    .form-section {
+        margin-bottom: 16px;
+    }
+
+    .cv-upload-zone {
+        padding: 24px 12px;
+        min-height: 90px;
+    }
+
+    .cv-upload-zone i {
+        font-size: 24px;
+    }
+
+    .info-box {
+        padding: 12px;
+        font-size: 12px;
+    }
+}
+

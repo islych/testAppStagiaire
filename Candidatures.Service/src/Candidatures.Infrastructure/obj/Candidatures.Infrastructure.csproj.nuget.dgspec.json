@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj": {}
+    "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj": {}
   },
   "projects": {
-    "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj": {
+    "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj",
+        "projectUniqueName": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj",
         "projectName": "Candidatures.Application",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj",
+        "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\obj\\",
+        "outputPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -33,11 +33,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj"
               },
-              "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj"
               }
             }
           }
@@ -58,6 +58,12 @@
         "net10.0": {
           "framework": "net10.0",
           "targetAlias": "net10.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[10.0.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -74,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -352,14 +358,14 @@
         }
       }
     },
-    "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
+    "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj",
+        "projectUniqueName": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj",
         "projectName": "Candidatures.Domain",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj",
+        "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\obj\\",
+        "outputPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -381,8 +387,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj"
               }
             }
           }
@@ -419,7 +425,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -697,14 +703,14 @@
         }
       }
     },
-    "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj": {
+    "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
+        "projectUniqueName": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
         "projectName": "Candidatures.Infrastructure",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
+        "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\Candidatures.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Infrastructure\\obj\\",
+        "outputPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -726,14 +732,14 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Application\\Candidatures.Application.csproj"
               },
-              "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Candidatures.Service\\src\\Candidatures.Domain\\Candidatures.Domain.csproj"
               },
-              "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj": {
-                "projectPath": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj"
+              "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj": {
+                "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj"
               }
             }
           }
@@ -760,6 +766,8 @@
               "version": "[10.0.9, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.9, )"
             }
@@ -780,7 +788,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1058,14 +1066,14 @@
         }
       }
     },
-    "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj": {
+    "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj",
+        "projectUniqueName": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj",
         "projectName": "Shared.Kernel",
-        "projectPath": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\Shared.Kernel.csproj",
+        "projectPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\Shared.Kernel.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\a\\0stage\\applicationStage\\Shared.Kernel\\obj\\",
+        "outputPath": "D:\\a\\0stage\\app2\\gestionDesStagiaires\\Shared.Kernel\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -1121,7 +1129,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
