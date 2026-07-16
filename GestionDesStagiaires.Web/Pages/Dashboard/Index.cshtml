@@ -110,9 +110,133 @@
         </div>
     </div>
 }
+else if (userRole == "Encadrant")
+{
+    <!-- Interface Encadrant -->
+    <div class="container-fluid mt-4">
+        <h1 class="mb-4">
+            <i class="bi bi-briefcase"></i> Tableau de Bord - Encadrant
+        </h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-person-circle"></i> Profil
+                        </h5>
+                        <p class="card-text">
+                            <strong>Bienvenue @User.Identity?.Name !</strong>
+                        </p>
+                        <dl class="row">
+                            <dt class="col-sm-3">Email :</dt>
+                            <dd class="col-sm-9">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</dd>
+
+                            <dt class="col-sm-3">Rôle :</dt>
+                            <dd class="col-sm-9">
+                                <span class="badge bg-warning text-dark">@userRole</span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-earmark-check display-4 text-success mb-3"></i>
+                                <h5 class="card-title">Gestion des Candidatures</h5>
+                                <p class="card-text text-muted">Consulter et gérer les candidatures soumises</p>
+                                <a href="/encadrant" class="btn btn-success btn-sm">
+                                    Accéder
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100 opacity-50">
+                            <div class="card-body text-center">
+                                <i class="bi bi-graph-up display-4 text-secondary mb-3"></i>
+                                <h5 class="card-title">Statistiques</h5>
+                                <span class="badge bg-info">À venir</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100 opacity-50">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-pdf display-4 text-secondary mb-3"></i>
+                                <h5 class="card-title">Rapports</h5>
+                                <span class="badge bg-info">À venir</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm h-100 opacity-50">
+                            <div class="card-body text-center">
+                                <i class="bi bi-bell display-4 text-secondary mb-3"></i>
+                                <h5 class="card-title">Notifications</h5>
+                                <span class="badge bg-info">À venir</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-info-circle"></i> Informations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted">
+                            En tant qu'encadrant, vous pouvez consulter et gérer les candidatures de stage.
+                        </p>
+
+                        <hr>
+
+                        <h6 class="card-subtitle mb-2">Services disponibles :</h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Gestion des candidatures</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Accepter/Refuser candidatures</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <strong>Consulter dossiers complets</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-clock text-warning"></i>
+                                <strong>Statistiques</strong> <span class="badge bg-info">Soon</span>
+                            </li>
+                        </ul>
+
+                        <hr>
+
+                        <p class="small text-muted mb-0">
+                            <i class="bi bi-question-circle"></i> Besoin d'aide ? <a href="#" class="text-decoration-none">Contactez le support</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 else
 {
-    <!-- Interface Utilisateur Standard -->
+    <!-- Interface Utilisateur Standard (Stagiaire) -->
     <div class="row">
         <div class="col-md-8">
             <h1 class="mb-4">

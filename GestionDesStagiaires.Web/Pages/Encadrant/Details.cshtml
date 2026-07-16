@@ -1,0 +1,292 @@
+@page "{id:guid}"
+@model GestionDesStagiaires.Web.Pages.Encadrant.DetailsModel
+
+@{
+    ViewData["Title"] = "Détails Candidature";
+}
+
+<div class="container mt-4">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="mt-3">
+            <a href="/encadrant" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    }
+    else if (Model.Candidature != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>
+                    <i class="bi bi-file-earmark-check"></i> Détails Candidature
+                </h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/encadrant" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Informations Stagiaire -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-circle"></i> Informations du Stagiaire
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.StagiaireInfo != null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nom:</strong> @Model.StagiaireInfo.Nom</p>
+                            <p><strong>Prénom:</strong> @Model.StagiaireInfo.Prenom</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> <a href="mailto:@Model.StagiaireInfo.Email">@Model.StagiaireInfo.Email</a></p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Informations du stagiaire indisponibles</p>
+                }
+            </div>
+        </div>
+
+        <!-- Informations Candidature -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-briefcase"></i> Informations Candidature
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Département:</strong> @Model.Candidature.DepartementNom</p>
+                        <p><strong>Spécialité:</strong> @Model.Candidature.SpecialiteNom</p>
+                        <p><strong>Durée demandée:</strong> @Model.Candidature.DureeStageMois mois</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>
+                            <strong>Niveau d'études:</strong> 
+                            @(Model.Candidature.NiveauEtude.ToString() switch
+                            {
+                                "Bac" => "Bac",
+                                "BacPlus2" => "Bac +2",
+                                "BacPlus3" => "Bac +3",
+                                "BacPlus4" => "Bac +4",
+                                "Ingenieur" => "Ingénieur",
+                                "Master" => "Master",
+                                "Doctorat" => "Doctorat",
+                                "Autre" => "Autre",
+                                _ => Model.Candidature.NiveauEtude.ToString()
+                            })
+                        </p>
+                        <p><strong>École:</strong> @Model.Candidature.Ecole</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            <strong>Date début:</strong> @Model.Candidature.DateDebut.ToString("dd/MM/yyyy")
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p>
+                            <strong>Date fin:</strong> @Model.Candidature.DateFin.ToString("dd/MM/yyyy")
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statut Actuel -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Statut Actuel
+                </h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var statusBadge = Model.Candidature.Statut switch
+                    {
+                        "EnAttente" => "bg-warning",
+                        "Acceptee" => "bg-success",
+                        "Refusee" => "bg-danger",
+                        _ => "bg-secondary"
+                    };
+
+                    var statusLabel = Model.Candidature.Statut switch
+                    {
+                        "EnAttente" => "En attente",
+                        "Acceptee" => "Acceptée",
+                        "Refusee" => "Refusée",
+                        _ => Model.Candidature.Statut
+                    };
+                }
+                <p>
+                    <strong>Statut:</strong> 
+                    <span class="badge @statusBadge" style="font-size: 14px;">@statusLabel</span>
+                </p>
+                <p><strong>Date création:</strong> @Model.Candidature.DateCreation.ToString("dd/MM/yyyy HH:mm")</p>
+                @if (Model.Candidature.DateDecision.HasValue)
+                {
+                    <p><strong>Date décision:</strong> @Model.Candidature.DateDecision.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                }
+                @if (!string.IsNullOrEmpty(Model.Candidature.Commentaire))
+                {
+                    <div class="alert alert-info">
+                        <strong>Motif:</strong> @Model.Candidature.Commentaire
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Lettre de Motivation -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-text"></i> Lettre de Motivation
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.Candidature.LettreMotivation))
+                {
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 400px; overflow-y: auto;">
+                        <p style="white-space: pre-wrap;">@Model.Candidature.LettreMotivation</p>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Aucune lettre de motivation fournie</p>
+                }
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-pdf"></i> Documents
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.Candidature.CvPath))
+                {
+                    <div>
+                        <strong>CV:</strong> 
+                        <a href="@Model.Candidature.CvPath" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Télécharger (@Model.Candidature.CvFileName)
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Aucun CV fourni</p>
+                }
+            </div>
+        </div>
+
+        <!-- Actions de Décision -->
+        @if (Model.Candidature.Statut == "EnAttente")
+        {
+            <div class="card border-primary mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Décision
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <i class="bi bi-info-circle"></i> Cette candidature est en attente de votre décision.
+                    </p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="post" asp-page-handler="Accept" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-lg w-100" 
+                                        onclick="return confirm('Êtes-vous sûr de vouloir accepter cette candidature ?');">
+                                    <i class="bi bi-check-circle"></i> Accepter
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="bi bi-x-circle"></i> Refuser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> 
+                Cette candidature a déjà été traitée et ne peut plus être modifiée.
+            </div>
+        }
+    }
+</div>
+
+<!-- Modal de Refus -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Reject">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="rejectModalLabel">
+                        <i class="bi bi-x-circle"></i> Refuser la Candidature
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="commentaireRefus" class="form-label">Motif du refus <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="commentaireRefus" name="commentaireRefus" rows="5" 
+                                  placeholder="Décrivez les raisons du refus..." required></textarea>
+                        <small class="text-muted">Ce motif sera communiqué au stagiaire.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check"></i> Confirmer le Refus
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Afficher les messages de succès/erreur depuis TempData
+        document.addEventListener('DOMContentLoaded', function () {
+            const successMsg = "@TempData["SuccessMessage"]";
+            if (successMsg) {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = '<i class="bi bi-check-circle"></i> ' + successMsg + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                document.querySelector('main').insertBefore(alert, document.querySelector('main').firstChild);
+            }
+
+            const errorMsg = "@TempData["ErrorMessage"]";
+            if (errorMsg) {
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show';
+                alert.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + errorMsg + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                document.querySelector('main').insertBefore(alert, document.querySelector('main').firstChild);
+            }
+        });
+    </script>
+}

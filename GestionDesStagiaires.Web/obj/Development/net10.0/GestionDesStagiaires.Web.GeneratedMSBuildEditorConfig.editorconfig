@@ -59,6 +59,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/a/0stage/app2/gestionDesStagiaires/GestionDesStagiaires.Web/Pages/Encadrant/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW5jYWRyYW50XERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/a/0stage/app2/gestionDesStagiaires/GestionDesStagiaires.Web/Pages/Encadrant/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW5jYWRyYW50XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/a/0stage/app2/gestionDesStagiaires/GestionDesStagiaires.Web/Pages/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
