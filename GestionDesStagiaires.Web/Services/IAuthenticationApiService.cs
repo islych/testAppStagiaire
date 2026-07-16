@@ -26,4 +26,9 @@ public interface IAuthenticationApiService
     /// Déconnecte l'utilisateur
     /// </summary>
     Task LogoutAsync();
+
+    /// <summary>
+    /// Récupère les informations d'un utilisateur par son ID
+    /// </summary>
+    Task<ApiResponse<UserDto>> GetUserByIdAsync(int userId, string token);
 }

@@ -128,4 +128,36 @@ public class AuthenticationApiService : IAuthenticationApiService
             _logger.LogError(ex, "Erreur lors de la déconnexion");
         }
     }
+
+    /// <summary>
+    /// Récupère les informations d'un utilisateur par son ID
+    /// </summary>
+    public async Task<ApiResponse<UserDto>> GetUserByIdAsync(int userId, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/users/{userId}");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning($"Utilisateur {userId} non trouvé : {response.StatusCode}");
+                return new ApiResponse<UserDto> { Success = false };
+            }
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponse<UserDto>>(
+                jsonResponse,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return apiResponse ?? new ApiResponse<UserDto> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de la récupération de l'utilisateur {UserId}", userId);
+            return new ApiResponse<UserDto> { Success = false };
+        }
+    }
 }
