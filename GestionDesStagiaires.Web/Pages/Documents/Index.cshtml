@@ -1,0 +1,371 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Documents.IndexModel
+
+@{
+    ViewData["Title"] = "Mes Documents";
+    var peutDeposer = Model.ACandidatureAcceptee;
+}
+
+<div class="container py-4">
+
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-file-pdf text-danger"></i> Mes Documents</h1>
+            <p class="text-muted">Déposez et suivez vos documents administratifs.</p>
+        </div>
+    </div>
+
+    @* ── Erreur de vérification (service candidatures indisponible) ── *@
+    @if (!string.IsNullOrEmpty(Model.ErreurVerification))
+    {
+        <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>@Model.ErreurVerification</div>
+        </div>
+    }
+
+    @* ── Bannière de blocage si candidature non acceptée ── *@
+    @if (User.IsInRole("Stagiaire") && !peutDeposer)
+    {
+        <div class="card border-warning shadow-sm mb-5">
+            <div class="card-body d-flex gap-3 align-items-start p-4">
+                <i class="bi bi-lock-fill text-warning fs-2 mt-1"></i>
+                <div>
+                    <h5 class="fw-bold mb-1">Dépôt de documents non disponible</h5>
+                    <p class="mb-2">
+                        Vous ne pouvez déposer vos documents administratifs qu'après que
+                        <strong>votre candidature a été acceptée par un encadrant</strong>.
+                    </p>
+                    <p class="text-muted small mb-3">
+                        Le processus est le suivant :
+                        <span class="badge bg-secondary">1. Déposer une candidature</span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span class="badge bg-secondary">2. Acceptation par l'encadrant</span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span class="badge bg-danger">3. Dépôt des documents</span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span class="badge bg-secondary">4. Validation Direction</span>
+                    </p>
+                    <a href="/candidatures" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        Voir mes candidatures
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @* Afficher quand même la liste des documents existants (lecture seule) *@
+        <div class="card shadow-sm opacity-75">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Documents déposés</h5>
+            </div>
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">Aucun document pour le moment.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* ── Interface complète quand candidature acceptée ── *@
+
+        <!-- Alerte résultat upload -->
+        <div id="uploadAlert" class="alert d-none alert-dismissible fade show" role="alert">
+            <span id="uploadAlertText"></span>
+            <button type="button" class="btn-close" onclick="hideAlert()"></button>
+        </div>
+
+        <div class="row">
+
+            <!-- Colonne gauche : liste des documents -->
+            <div class="col-lg-7 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-list-check"></i> Mes documents déposés</h5>
+                        <button class="btn btn-sm btn-light" onclick="chargerDocuments()">
+                            <i class="bi bi-arrow-clockwise"></i> Actualiser
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="loadingDocs" class="text-center py-4 d-none">
+                            <div class="spinner-border text-danger" role="status"></div>
+                            <p class="mt-2 text-muted">Chargement…</p>
+                        </div>
+                        <div id="emptyDocs" class="text-center py-5 text-muted d-none">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <p class="mt-2">Aucun document déposé pour l'instant.</p>
+                        </div>
+                        <div id="docsError" class="alert alert-warning m-3 d-none">
+                            <i class="bi bi-wifi-off"></i> Impossible de contacter le service Documents.
+                        </div>
+                        <table class="table table-hover mb-0 d-none" id="docsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Fichier</th>
+                                    <th>Statut</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="docsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : formulaire upload -->
+            <div class="col-lg-5 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-upload"></i> Déposer un document</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" novalidate>
+
+                            <!-- Type de document -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-tag"></i> Type de document *
+                                </label>
+                                <select class="form-select" id="typeDocument" required>
+                                    <option value="">-- Sélectionnez un type --</option>
+                                    <option value="CV">Curriculum Vitae (CV)</option>
+                                    <option value="ConventionDeStage">Convention de stage</option>
+                                    <option value="Assurance">Attestation d'assurance</option>
+                                    <option value="CIN">Carte d'identité (CIN)</option>
+                                    <option value="LettreDeRecommandation">Lettre de recommandation</option>
+                                    <option value="RapportDeStage">Rapport de stage</option>
+                                    <option value="DemandeManuscrite">Demande manuscrite</option>
+                                    <option value="FicheAppreciation">Fiche d'appréciation</option>
+                                    <option value="FicheDeSynthese">Fiche de synthèse</option>
+                                </select>
+                            </div>
+
+                            <!-- Zone d'upload -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-paperclip"></i> Fichier *
+                                </label>
+                                <div class="upload-zone border rounded p-4 text-center" id="uploadZone"
+                                     onclick="document.getElementById('fichierInput').click()"
+                                     ondragover="event.preventDefault(); this.classList.add('border-danger')"
+                                     ondragleave="this.classList.remove('border-danger')"
+                                     ondrop="handleDrop(event)">
+                                    <i class="bi bi-cloud-upload fs-2 text-secondary"></i>
+                                    <p class="mt-2 mb-1 text-muted">Déposez votre fichier ici</p>
+                                    <small class="text-muted">PDF, JPG, PNG, DOC, DOCX — max 10 Mo</small>
+                                    <input type="file" id="fichierInput" class="d-none"
+                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                           onchange="afficherFichier(this.files[0])">
+                                </div>
+                                <div id="fichierInfo" class="alert alert-light border mt-2 d-none">
+                                    <i class="bi bi-check-circle text-success"></i>
+                                    <strong id="fichierNom"></strong>
+                                    <span id="fichierTaille" class="text-muted small ms-1"></span>
+                                </div>
+                            </div>
+
+                            <!-- Bouton soumettre -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-danger" id="btnUpload">
+                                    <i class="bi bi-upload"></i> Déposer le document
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Légende des statuts -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body py-2 px-3">
+                        <small class="text-muted d-block mb-1 fw-semibold">Légende des statuts :</small>
+                        <span class="badge bg-warning text-dark me-1">En attente</span>
+                        <span class="badge bg-success me-1">Validé</span>
+                        <span class="badge bg-danger me-1">Refusé</span>
+                        <span class="badge bg-info me-1">Correction soumise</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+@if (peutDeposer)
+{
+<script>
+    const API   = '@Model.DocumentsApiUrl';
+    const TOKEN = '@Model.JwtToken';
+
+    function getToken() { return TOKEN; }
+
+    // ─── Chargement des documents ────────────────────────────────────────────
+    async function chargerDocuments() {
+        const loading = document.getElementById('loadingDocs');
+        const empty   = document.getElementById('emptyDocs');
+        const error   = document.getElementById('docsError');
+        const table   = document.getElementById('docsTable');
+
+        loading.classList.remove('d-none');
+        [empty, error, table].forEach(el => el.classList.add('d-none'));
+
+        try {
+            const res = await fetch(`${API}/api/v1/documents/me`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+
+            loading.classList.add('d-none');
+
+            if (!res.ok) { error.classList.remove('d-none'); return; }
+
+            const json = await res.json();
+            const docs = json.data ?? [];
+
+            if (docs.length === 0) { empty.classList.remove('d-none'); return; }
+
+            const tbody = document.getElementById('docsBody');
+            tbody.innerHTML = '';
+
+            docs.forEach(doc => {
+                const badge = {
+                    'EnAttente':           '<span class="badge bg-warning text-dark">En attente</span>',
+                    'Valide':              '<span class="badge bg-success">Validé</span>',
+                    'Refuse':              '<span class="badge bg-danger">Refusé</span>',
+                    'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+                }[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
+
+                const date = new Date(doc.dateDepot).toLocaleDateString('fr-FR');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${doc.typeLibelle}</small></td>
+                        <td>
+                            <small class="text-truncate d-inline-block" style="max-width:120px"
+                                   title="${doc.nomFichier}">${doc.nomFichier}</small>
+                        </td>
+                        <td>${badge}</td>
+                        <td><small>${date}</small></td>
+                        <td>
+                            <a href="${API}/api/v1/documents/${doc.id}/telecharger"
+                               target="_blank" class="btn btn-sm btn-outline-secondary"
+                               title="Télécharger">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            ${doc.statut === 'Refuse' ? `
+                            <button class="btn btn-sm btn-outline-warning ms-1"
+                                    title="Soumettre une correction"
+                                    onclick="preparerCorrection('${doc.id}', '${doc.type}')">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>` : ''}
+                        </td>
+                    </tr>`;
+            });
+
+            table.classList.remove('d-none');
+
+        } catch (e) {
+            loading.classList.add('d-none');
+            error.classList.remove('d-none');
+        }
+    }
+
+    // ─── Sélection de fichier ────────────────────────────────────────────────
+    function afficherFichier(file) {
+        if (!file) return;
+        document.getElementById('fichierNom').textContent    = file.name;
+        document.getElementById('fichierTaille').textContent = `(${(file.size / 1024).toFixed(0)} Ko)`;
+        document.getElementById('fichierInfo').classList.remove('d-none');
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById('uploadZone').classList.remove('border-danger');
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('fichierInput').files = event.dataTransfer.files;
+            afficherFichier(file);
+        }
+    }
+
+    // ─── Upload ──────────────────────────────────────────────────────────────
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const type  = document.getElementById('typeDocument').value;
+        const input = document.getElementById('fichierInput');
+
+        if (!type)  { showAlert('Veuillez sélectionner un type de document.', 'warning'); return; }
+        if (!input.files.length) { showAlert('Veuillez sélectionner un fichier.', 'warning'); return; }
+
+        const btn = document.getElementById('btnUpload');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Dépôt en cours…';
+
+        const formData = new FormData();
+        formData.append('fichier', input.files[0]);
+        formData.append('type', type);
+
+        try {
+            const res = await fetch(`${API}/api/v1/documents/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}` },
+                body: formData
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.success) {
+                showAlert('Document déposé avec succès. Il est en attente de vérification.', 'success');
+                document.getElementById('uploadForm').reset();
+                document.getElementById('fichierInfo').classList.add('d-none');
+                chargerDocuments();
+            } else {
+                showAlert(json.message ?? 'Erreur lors du dépôt.', 'danger');
+            }
+        } catch {
+            showAlert('Impossible de contacter le service Documents. Vérifiez qu\'il est bien démarré.', 'danger');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-upload"></i> Déposer le document';
+        }
+    });
+
+    // ─── Correction d'un document refusé ────────────────────────────────────
+    function preparerCorrection(docId, type) {
+        document.getElementById('typeDocument').value = type;
+        document.getElementById('typeDocument').disabled = true;
+        showAlert('Sélectionnez le nouveau fichier corrigé et cliquez sur "Déposer".', 'info');
+        document.getElementById('uploadZone').scrollIntoView({ behavior: 'smooth' });
+        const btn = document.getElementById('btnUpload');
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Soumettre la correction';
+        btn.classList.replace('btn-danger', 'btn-warning');
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+    function showAlert(msg, type) {
+        const el = document.getElementById('uploadAlert');
+        document.getElementById('uploadAlertText').textContent = msg;
+        el.className = `alert alert-${type} alert-dismissible fade show`;
+        el.classList.remove('d-none');
+        el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideAlert() {
+        document.getElementById('uploadAlert').classList.add('d-none');
+    }
+
+    document.addEventListener('DOMContentLoaded', chargerDocuments);
+</script>
+
+<style>
+    .upload-zone {
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        background: #fafafa;
+    }
+    .upload-zone:hover { border-color: #dc3545 !important; background: #fff5f5; }
+</style>
+}
+}
