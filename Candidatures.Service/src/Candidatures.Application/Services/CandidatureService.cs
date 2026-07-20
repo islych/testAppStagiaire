@@ -14,13 +14,16 @@ public class CandidatureService : ICandidatureService
 {
     private readonly ICandidatureRepository _repository;
     private readonly INotificationService _notificationService;
+    private readonly IUserLookupService _userLookup;
 
     public CandidatureService(
         ICandidatureRepository repository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IUserLookupService userLookup)
     {
         _repository = repository;
         _notificationService = notificationService;
+        _userLookup = userLookup;
     }
 
     /// <summary>
@@ -78,12 +81,15 @@ public class CandidatureService : ICandidatureService
         return candidature != null ? MapToDto(candidature) : null;
     }
 
-    /// <summary>
-    /// Récupère toutes les candidatures
-    /// </summary>
     public async Task<IEnumerable<CandidatureDto>> GetAllCandidaturesAsync()
     {
         var candidatures = await _repository.GetAllAsync();
+        return candidatures.Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<CandidatureDto>> GetCandidaturesByDepartementAsync(int departementId)
+    {
+        var candidatures = await _repository.GetByDepartementIdAsync(departementId);
         return candidatures.Select(MapToDto);
     }
 
@@ -99,61 +105,88 @@ public class CandidatureService : ICandidatureService
         return candidatures.Select(MapToDto);
     }
 
-    /// <summary>
-    /// Accepte une candidature
-    /// </summary>
-    public async Task<CandidatureDto> AcceptCandidatureAsync(Guid candidatureId, int encadrantId)
+    /// <summary>Encadrant transmet la candidature à la Direction</summary>
+    public async Task<CandidatureDto> TransmettreADirectionAsync(Guid candidatureId, int encadrantId)
     {
-        // Validation
-        var validator = new AcceptCandidatureValidator();
-        var validationResult = validator.Validate(new Commands.AcceptCandidatureCommand(candidatureId, encadrantId));
-
-        if (!validationResult.IsValid)
-            throw new ApplicationException(string.Join(", ", validationResult.Errors));
-
-        // Récupérer la candidature
         var candidature = await _repository.GetByIdAsync(candidatureId)
             ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
 
-        // Vérifier qu'elle n'a pas déjà été traitée
         if (candidature.Statut != CandidatureStatus.EnAttente)
-            throw new ApplicationException($"La candidature ne peut pas être acceptée car elle a déjà le statut {candidature.Statut}.");
+            throw new ApplicationException("Seules les candidatures en attente peuvent être transmises à la Direction.");
 
-        // Mettre à jour
-        candidature.Statut = CandidatureStatus.Acceptee;
+        candidature.Statut = CandidatureStatus.TransmiseADirection;
         candidature.EncadrantId = encadrantId;
-        candidature.DateDecision = DateTime.UtcNow;
         candidature.DateMiseAJour = DateTime.UtcNow;
+        candidature.TransmisADirection = true;
+        candidature.DestinataireTransmission = "Direction";
+        candidature.DateTransmissionDirection = DateTime.UtcNow;
 
         var updated = await _repository.UpdateAsync(candidature);
-
-        // Notifier
-        await _notificationService.NotifyCandidatureAcceptedAsync(updated.Id, updated.StagiaireId);
+        await _notificationService.NotifyTransmittedToDirectionAsync(updated.Id);
 
         return MapToDto(updated);
     }
 
-    /// <summary>
-    /// Refuse une candidature avec un commentaire obligatoire
-    /// </summary>
-    public async Task<CandidatureDto> RejectCandidatureAsync(Guid candidatureId, int encadrantId, string commentaire)
+    /// <summary>Direction transmet la candidature au Centre</summary>
+    public async Task<CandidatureDto> TransmettreCentreAsync(Guid candidatureId)
     {
-        // Validation
-        var validator = new RejectCandidatureValidator();
-        var validationResult = validator.Validate(new Commands.RejectCandidatureCommand(candidatureId, encadrantId, commentaire));
-
-        if (!validationResult.IsValid)
-            throw new ApplicationException(string.Join(", ", validationResult.Errors));
-
-        // Récupérer la candidature
         var candidature = await _repository.GetByIdAsync(candidatureId)
             ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
 
-        // Vérifier qu'elle n'a pas déjà été traitée
-        if (candidature.Statut != CandidatureStatus.EnAttente)
-            throw new ApplicationException($"La candidature ne peut pas être refusée car elle a déjà le statut {candidature.Statut}.");
+        if (candidature.Statut != CandidatureStatus.TransmiseADirection)
+            throw new ApplicationException("Seules les candidatures transmises à la Direction peuvent être envoyées au Centre.");
 
-        // Mettre à jour
+        candidature.DestinataireTransmission = "Centre";
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+
+        return MapToDto(updated);
+    }
+
+    /// <summary>Centre transmet la candidature acceptée au RH</summary>
+    public async Task<CandidatureDto> TransmettreRHAsync(Guid candidatureId)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        if (candidature.Statut != CandidatureStatus.Acceptee)
+            throw new ApplicationException("Seules les candidatures acceptées peuvent être transmises au RH.");
+
+        candidature.DestinataireTransmission = "RH";
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+
+        return MapToDto(updated);
+    }
+
+    /// <summary>RH intègre le stagiaire dans le système (étape finale)</summary>
+    public async Task<CandidatureDto> IntegrerStagiaireAsync(Guid candidatureId)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        if (!string.Equals(candidature.DestinataireTransmission, "RH", StringComparison.OrdinalIgnoreCase))
+            throw new ApplicationException("Ce dossier n'a pas été transmis au RH.");
+
+        candidature.DestinataireTransmission = "RH_Integre";
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+
+        return MapToDto(updated);
+    }
+
+    /// <summary>Encadrant refuse directement une candidature</summary>
+    public async Task<CandidatureDto> RejectCandidatureAsync(Guid candidatureId, int encadrantId, string commentaire)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        if (candidature.Statut != CandidatureStatus.EnAttente)
+            throw new ApplicationException($"Cette candidature ne peut pas être refusée (statut actuel : {candidature.Statut}).");
+
         candidature.Statut = CandidatureStatus.Refusee;
         candidature.EncadrantId = encadrantId;
         candidature.Commentaire = commentaire;
@@ -161,21 +194,63 @@ public class CandidatureService : ICandidatureService
         candidature.DateMiseAJour = DateTime.UtcNow;
 
         var updated = await _repository.UpdateAsync(candidature);
-
-        // Notifier
         await _notificationService.NotifyCandidatureRejectedAsync(updated.Id, updated.StagiaireId, commentaire);
 
         return MapToDto(updated);
     }
 
-    /// <summary>
-    /// Récupère le suivi d'une candidature (visible par le stagiaire)
-    /// </summary>
+    /// <summary>Direction accepte → email stagiaire + encadrant</summary>
+    public async Task<CandidatureDto> AccepterParDirectionAsync(Guid candidatureId, string token)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        if (candidature.Statut != CandidatureStatus.TransmiseADirection)
+            throw new ApplicationException("Seules les candidatures transmises à la Direction peuvent être acceptées ici.");
+
+        candidature.Statut = CandidatureStatus.Acceptee;
+        candidature.DateDecision = DateTime.UtcNow;
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+
+        // Récupérer email + nom du stagiaire
+        var userInfo = await _userLookup.GetUserInfoAsync(updated.StagiaireId, token);
+        var email = userInfo?.Email ?? string.Empty;
+        var nom = userInfo?.NomComplet ?? string.Empty;
+
+        await _notificationService.NotifyAcceptedByDirectionAsync(
+            updated.Id, updated.StagiaireId,
+            updated.EncadrantId ?? 0,
+            email, nom, token);
+
+        return MapToDto(updated);
+    }
+
+    /// <summary>Direction refuse la candidature</summary>
+    public async Task<CandidatureDto> RefuserParDirectionAsync(Guid candidatureId, string commentaire)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        if (candidature.Statut != CandidatureStatus.TransmiseADirection)
+            throw new ApplicationException("Seules les candidatures transmises à la Direction peuvent être refusées ici.");
+
+        candidature.Statut = CandidatureStatus.Refusee;
+        candidature.Commentaire = commentaire;
+        candidature.DateDecision = DateTime.UtcNow;
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+        await _notificationService.NotifyCandidatureRejectedAsync(updated.Id, updated.StagiaireId, commentaire);
+
+        return MapToDto(updated);
+    }
+
     public async Task<CandidatureSuiviDto?> GetCandidatureSuiviAsync(Guid candidatureId)
     {
         var candidature = await _repository.GetByIdAsync(candidatureId);
-        if (candidature == null)
-            return null;
+        if (candidature == null) return null;
 
         return new CandidatureSuiviDto
         {
@@ -187,32 +262,34 @@ public class CandidatureService : ICandidatureService
         };
     }
 
-    /// <summary>
-    /// Transmet une candidature acceptée à la Direction
-    /// </summary>
-    public async Task<bool> TransmitToDirectionAsync(Guid candidatureId)
+    /// <summary>Conservé pour compatibilité — plus utilisé dans le nouveau flux</summary>
+    public async Task<bool> TransmitToDirectionAsync(Guid candidatureId, string destinataire)
     {
-        var candidature = await _repository.GetByIdAsync(candidatureId)
-            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
-
-        if (candidature.Statut != CandidatureStatus.Acceptee)
-            throw new ApplicationException("Seules les candidatures acceptées peuvent être transmises à la Direction.");
-
-        candidature.TransmisADirection = true;
-        candidature.DateTransmissionDirection = DateTime.UtcNow;
-        candidature.DateMiseAJour = DateTime.UtcNow;
-
-        await _repository.UpdateAsync(candidature);
-
-        // Notifier la Direction
-        await _notificationService.NotifyTransmittedToDirectionAsync(candidatureId);
-
+        await TransmettreADirectionAsync(candidatureId, 0);
         return true;
     }
 
     /// <summary>
-    /// Mappe une entité Candidature en DTO avec enrichissement des noms de département et spécialité
+    /// Appelé automatiquement par Documents.Service quand tous les documents sont validés par le Centre.
+    /// Met DestinataireTransmission = "DossierAccepte".
     /// </summary>
+    public async Task<CandidatureDto> MarquerDossierAccepteAsync(Guid candidatureId)
+    {
+        var candidature = await _repository.GetByIdAsync(candidatureId)
+            ?? throw new ApplicationException($"Candidature {candidatureId} non trouvée.");
+
+        // Accepter uniquement si le dossier est bien en cours de traitement par le Centre
+        if (candidature.Statut != CandidatureStatus.Acceptee)
+            throw new ApplicationException(
+                $"Le dossier ne peut pas être marqué accepté (statut actuel : {candidature.Statut}).");
+
+        candidature.DestinataireTransmission = "DossierAccepte";
+        candidature.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(candidature);
+
+        return MapToDto(updated);
+    }
     private static CandidatureDto MapToDto(Candidature candidature)
     {
         // Récupérer les noms de département et spécialité
@@ -242,6 +319,7 @@ public class CandidatureService : ICandidatureService
             DateMiseAJour = candidature.DateMiseAJour,
             DateDecision = candidature.DateDecision,
             TransmisADirection = candidature.TransmisADirection,
+            DestinataireTransmission = candidature.DestinataireTransmission,
             DateTransmissionDirection = candidature.DateTransmissionDirection
         };
     }

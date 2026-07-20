@@ -141,9 +141,6 @@ public class CandidatureDto
     /// Si transmis à la Direction
     /// </summary>
     public bool TransmisADirection { get; set; }
-
-    /// <summary>
-    /// Date de transmission à la Direction
-    /// </summary>
+    public string? DestinataireTransmission { get; set; }
     public DateTime? DateTransmissionDirection { get; set; }
 }

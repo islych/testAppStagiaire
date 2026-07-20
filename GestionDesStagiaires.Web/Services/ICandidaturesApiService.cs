@@ -32,10 +32,13 @@ public interface ICandidaturesApiService
     /// </summary>
     Task<ApiResponse<CandidatureSuiviViewModel>> GetCandidatureSuiviAsync(Guid id, string token);
 
-    /// <summary>
-    /// Accepte une candidature
-    /// </summary>
     Task<ApiResponse<CandidatureViewModel>> AcceptCandidatureAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> TransmettreADirectionAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> TransmettreCentreAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> TransmettreRHAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> IntegrerStagiaireAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> AccepterParDirectionAsync(Guid id, string token);
+    Task<ApiResponse<CandidatureViewModel>> RefuserParDirectionAsync(Guid id, string motif, string token);
 
     /// <summary>
     /// Refuse une candidature

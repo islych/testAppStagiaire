@@ -14,7 +14,12 @@ public interface INotificationService
     /// <summary>
     /// Envoie une notification d'acceptation
     /// </summary>
-    Task NotifyCandidatureAcceptedAsync(Guid candidatureId, int stagiaireId);
+    Task NotifyCandidatureAcceptedAsync(Guid candidatureId, int stagiaireId, string emailStagiaire, string nomStagiaire);
+
+    /// <summary>
+    /// Envoie une notification d'acceptation par la Direction (stagiaire + encadrant)
+    /// </summary>
+    Task NotifyAcceptedByDirectionAsync(Guid candidatureId, int stagiaireId, int encadrantId, string emailStagiaire, string nomStagiaire, string token);
 
     /// <summary>
     /// Envoie une notification de refus

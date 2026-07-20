@@ -30,7 +30,16 @@ builder.Services.AddScoped<IDocumentService, DocumentService>();
 // ─────────────────────────────────────────────────────────────────────────────
 // EXTERNAL SERVICES
 // ─────────────────────────────────────────────────────────────────────────────
-builder.Services.AddScoped<INotificationService, NotificationServiceStub>();
+
+// Client HTTP vers Notifications.Service
+var notificationsApiUrl = builder.Configuration["ExternalApis:NotificationsService"]
+    ?? "http://localhost:5132";
+
+builder.Services.AddHttpClient<INotificationService, NotificationServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(notificationsApiUrl);
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 var authenticationApiUrl = builder.Configuration["ExternalApis:AuthenticationService"]
     ?? "https://localhost:7058";

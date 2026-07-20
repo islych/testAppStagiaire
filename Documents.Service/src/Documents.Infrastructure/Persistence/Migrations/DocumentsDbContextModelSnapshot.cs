@@ -49,6 +49,14 @@ namespace Documents.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("ContentType");
 
+                    b.Property<string>("DestinataireActuel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Encadrant")
+                        .HasColumnName("DestinataireActuel");
+
                     b.Property<DateTime>("DateDepot")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")

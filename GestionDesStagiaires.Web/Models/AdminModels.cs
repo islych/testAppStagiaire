@@ -10,6 +10,7 @@ public class UserDto
     public string Prenom { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public int? DepartementId { get; set; }
     public bool Statut { get; set; }
     public DateTime DateCreation { get; set; }
 }
@@ -32,4 +33,5 @@ public class CreateUserRequest
     public string Prenom { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public int RoleId { get; set; }
+    public int? DepartementId { get; set; }
 }

@@ -12,4 +12,10 @@ public interface ICandidaturesServiceClient
     /// Retourne true uniquement si au moins une candidature a le statut "Acceptee".
     /// </summary>
     Task<bool> StagiaireACandidatureAccepteeAsync(int stagiaireId, string jwtToken);
+
+    /// <summary>
+    /// Notifie Candidatures.Service que tous les documents d'un dossier ont été validés.
+    /// Déclenche le passage automatique du dossier en "DossierAccepte".
+    /// </summary>
+    Task MarquerDossierAccepteAsync(Guid candidatureId, string jwtToken);
 }

@@ -19,14 +19,14 @@ public class NotificationServiceStub : INotificationService
         System.Diagnostics.Debug.WriteLine($"[NOTIFICATION] Candidature {candidatureId} créée par stagiaire {stagiaireId}");
     }
 
-    /// <summary>
-    /// Envoie une notification d'acceptation
-    /// </summary>
-    public async Task NotifyCandidatureAcceptedAsync(Guid candidatureId, int stagiaireId)
+    public async Task NotifyCandidatureAcceptedAsync(Guid candidatureId, int stagiaireId, string emailStagiaire, string nomStagiaire)
     {
-        // TODO: Intégrer avec Notification.Service
         await Task.CompletedTask;
-        System.Diagnostics.Debug.WriteLine($"[NOTIFICATION] Candidature {candidatureId} acceptée pour stagiaire {stagiaireId}");
+    }
+
+    public async Task NotifyAcceptedByDirectionAsync(Guid candidatureId, int stagiaireId, int encadrantId, string emailStagiaire, string nomStagiaire, string token)
+    {
+        await Task.CompletedTask;
     }
 
     /// <summary>

@@ -39,10 +39,26 @@ public class NotificationServiceStub : INotificationService
         return Task.CompletedTask;
     }
 
-    public Task NotifyCorrectionSoumiseAsync(Guid documentId, int stagiaireId)
+    public Task NotifyDossierTransmisAuCentreAsync(Guid documentId, int stagiaireId)
     {
         _logger.LogInformation(
-            "[STUB] Notification : correction soumise pour le document {DocumentId} — stagiaire {StagiaireId}",
+            "[STUB] Notification : dossier transmis au Centre — document {DocumentId} — stagiaire {StagiaireId}",
+            documentId, stagiaireId);
+        return Task.CompletedTask;
+    }
+
+    public Task NotifyModificationDemandeeAsync(Guid documentId, int stagiaireId, string commentaire)
+    {
+        _logger.LogInformation(
+            "[STUB] Notification : modification demandée sur {DocumentId} — stagiaire {StagiaireId} — commentaire : {Commentaire}",
+            documentId, stagiaireId, commentaire);
+        return Task.CompletedTask;
+    }
+
+    public Task NotifyCorrectionSoumiseCentreAsync(Guid documentId, int stagiaireId)
+    {
+        _logger.LogInformation(
+            "[STUB] Notification : correction soumise au Centre — document {DocumentId} — stagiaire {StagiaireId}",
             documentId, stagiaireId);
         return Task.CompletedTask;
     }

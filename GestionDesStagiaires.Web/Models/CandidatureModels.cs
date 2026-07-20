@@ -28,6 +28,7 @@ public class CandidatureViewModel
     public DateTime? DateMiseAJour { get; set; }
     public DateTime? DateDecision { get; set; }
     public bool TransmisADirection { get; set; }
+    public string? DestinataireTransmission { get; set; }
     public DateTime? DateTransmissionDirection { get; set; }
 }
 
@@ -62,17 +63,19 @@ public class CandidatureSuiviViewModel
 
     public string StatutBadgeClass => Statut switch
     {
-        "EnAttente" => "bg-warning",
-        "Acceptee" => "bg-success",
-        "Refusee" => "bg-danger",
-        _ => "bg-secondary"
+        "EnAttente"           => "bg-warning text-dark",
+        "TransmiseADirection" => "bg-info text-dark",
+        "Acceptee"            => "bg-success",
+        "Refusee"             => "bg-danger",
+        _                     => "bg-secondary"
     };
 
     public string StatutLabel => Statut switch
     {
-        "EnAttente" => "En attente",
-        "Acceptee" => "Acceptée",
-        "Refusee" => "Refusée",
-        _ => Statut
+        "EnAttente"           => "En attente — examinée par l'encadrant",
+        "TransmiseADirection" => "En cours — examinée par la Direction",
+        "Acceptee"            => "Acceptée",
+        "Refusee"             => "Refusée",
+        _                     => Statut
     };
 }

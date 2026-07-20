@@ -73,6 +73,9 @@ namespace Candidatures.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("DepartementId");
 
+                    b.Property<string>("DestinataireTransmission")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("DureeStageMois")
                         .HasColumnType("int");
 

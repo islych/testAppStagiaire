@@ -3,8 +3,7 @@ using Candidatures.Application.Services;
 using Candidatures.Domain.Interfaces;
 using Candidatures.Infrastructure.ExternalServices;
 using Candidatures.Infrastructure.Persistence;
-using Candidatures.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Candidatures.Infrastructure.Repositories;using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -21,9 +20,17 @@ builder.Services.AddScoped<ICandidatureRepository, CandidatureRepository>();
 // Application Services
 builder.Services.AddScoped<ICandidatureService, CandidatureService>();
 builder.Services.AddScoped<IMasterDataService, MasterDataService>();
+builder.Services.AddScoped<IUserLookupService, UserLookupService>();
 
-// External Services
-builder.Services.AddScoped<INotificationService, NotificationServiceStub>();
+// External Services — client HTTP vers Notifications.Service
+var notificationsApiUrl = builder.Configuration["ExternalApis:NotificationsService"]
+    ?? "http://localhost:5132";
+
+builder.Services.AddHttpClient<INotificationService, NotificationServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(notificationsApiUrl);
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 // ⭐ HttpClient pour Authentication.Service
 var authenticationApiUrl = builder.Configuration["ExternalApis:AuthenticationService"] 

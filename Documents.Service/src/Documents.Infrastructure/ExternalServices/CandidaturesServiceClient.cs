@@ -91,4 +91,35 @@ public class CandidaturesServiceClient : ICandidaturesServiceClient
     {
         public string Statut { get; set; } = string.Empty;
     }
+
+    /// <inheritdoc />
+    public async Task MarquerDossierAccepteAsync(Guid candidatureId, string jwtToken)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"/api/v1/candidatures/{candidatureId}/dossier-accepte");
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", jwtToken);
+
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                _logger.LogWarning(
+                    "Candidatures.Service a retourné {Status} pour marquer dossier accepté {CandidatureId}",
+                    response.StatusCode, candidatureId);
+            else
+                _logger.LogInformation(
+                    "Dossier {CandidatureId} marqué accepté automatiquement.", candidatureId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Erreur lors du marquage du dossier {CandidatureId} comme accepté", candidatureId);
+        }
+    }
 }

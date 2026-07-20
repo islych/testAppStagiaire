@@ -98,12 +98,17 @@ public class Candidature
     public DateTime? DateDecision { get; set; }
 
     /// <summary>
-    /// Indique si la candidature a été transmise à la Direction
+    /// Indique si la candidature a été transmise
     /// </summary>
     public bool TransmisADirection { get; set; } = false;
 
     /// <summary>
-    /// Date de transmission à la Direction
+    /// Destinataire de la transmission : RH, Centre, Direction
+    /// </summary>
+    public string? DestinataireTransmission { get; set; }
+
+    /// <summary>
+    /// Date de transmission
     /// </summary>
     public DateTime? DateTransmissionDirection { get; set; }
 }

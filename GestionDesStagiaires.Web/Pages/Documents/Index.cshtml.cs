@@ -21,6 +21,9 @@ public class IndexModel : PageModel
     /// <summary>True si le stagiaire a au moins une candidature acceptée</summary>
     public bool ACandidatureAcceptee { get; set; } = false;
 
+    /// <summary>ID de la candidature acceptée — transmis au JS pour l'associer aux documents</summary>
+    public string CandidatureAccepteeId { get; set; } = string.Empty;
+
     /// <summary>Message d'erreur à afficher en cas d'impossibilité de vérifier</summary>
     public string? ErreurVerification { get; set; }
 
@@ -88,6 +91,10 @@ public class IndexModel : PageModel
                 string.Equals(c.Statut, "Acceptee", StringComparison.OrdinalIgnoreCase))
                 ?? false;
 
+            var candidatureAcceptee = result?.Data?.FirstOrDefault(c =>
+                string.Equals(c.Statut, "Acceptee", StringComparison.OrdinalIgnoreCase));
+            CandidatureAccepteeId = candidatureAcceptee?.Id ?? string.Empty;
+
             _logger.LogInformation(
                 "Stagiaire {User} — candidature acceptée : {Resultat}",
                 User.Identity?.Name, ACandidatureAcceptee);
@@ -111,6 +118,7 @@ public class IndexModel : PageModel
 
     private class CandidatureItem
     {
+        public string Id { get; set; } = string.Empty;
         public string Statut { get; set; } = string.Empty;
     }
 }

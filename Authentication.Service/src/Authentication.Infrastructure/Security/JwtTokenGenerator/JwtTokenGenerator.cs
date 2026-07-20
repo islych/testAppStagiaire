@@ -31,6 +31,10 @@ namespace Authentication.Infrastructure.Security.JwtTokenGenerator
                 new Claim("nom", utilisateur.Nom)
             };
 
+            // Ajouter le département si c'est un encadrant
+            if (utilisateur.DepartementId.HasValue)
+                claims.Add(new Claim("departementId", utilisateur.DepartementId.Value.ToString()));
+
             foreach (var permission in permissions)
                 claims.Add(new Claim("permission", permission));
 

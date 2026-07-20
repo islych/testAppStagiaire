@@ -2,48 +2,40 @@ using Candidatures.Application.DTOs;
 
 namespace Candidatures.Application.Interfaces;
 
-/// <summary>
-/// Interface du service métier des candidatures
-/// </summary>
 public interface ICandidatureService
 {
-    /// <summary>
-    /// Crée une nouvelle candidature
-    /// </summary>
     Task<CandidatureDto> CreateCandidatureAsync(CreateCandidatureDto dto);
-
-    /// <summary>
-    /// Récupère une candidature par son ID
-    /// </summary>
     Task<CandidatureDto?> GetCandidatureByIdAsync(Guid id);
-
-    /// <summary>
-    /// Récupère toutes les candidatures
-    /// </summary>
     Task<IEnumerable<CandidatureDto>> GetAllCandidaturesAsync();
-
-    /// <summary>
-    /// Récupère les candidatures d'un stagiaire (int - matching Authentication.Service)
-    /// </summary>
+    Task<IEnumerable<CandidatureDto>> GetCandidaturesByDepartementAsync(int departementId);
     Task<IEnumerable<CandidatureDto>> GetCandidaturesByStagiaireAsync(int stagiaireId);
 
-    /// <summary>
-    /// Accepte une candidature
-    /// </summary>
-    Task<CandidatureDto> AcceptCandidatureAsync(Guid candidatureId, int encadrantId);
+    /// <summary>Encadrant transmet la candidature à la Direction</summary>
+    Task<CandidatureDto> TransmettreADirectionAsync(Guid candidatureId, int encadrantId);
 
-    /// <summary>
-    /// Refuse une candidature
-    /// </summary>
+    /// <summary>Direction transmet la candidature au Centre</summary>
+    Task<CandidatureDto> TransmettreCentreAsync(Guid candidatureId);
+
+    /// <summary>Centre transmet la candidature acceptée au RH</summary>
+    Task<CandidatureDto> TransmettreRHAsync(Guid candidatureId);
+
+    /// <summary>RH intègre le stagiaire dans le système (étape finale)</summary>
+    Task<CandidatureDto> IntegrerStagiaireAsync(Guid candidatureId);
+
+    /// <summary>Encadrant refuse directement une candidature</summary>
     Task<CandidatureDto> RejectCandidatureAsync(Guid candidatureId, int encadrantId, string commentaire);
 
-    /// <summary>
-    /// Récupère le suivi d'une candidature
-    /// </summary>
+    /// <summary>Direction accepte → notifie stagiaire + encadrant par email</summary>
+    Task<CandidatureDto> AccepterParDirectionAsync(Guid candidatureId, string token);
+
+    /// <summary>Direction refuse la candidature</summary>
+    Task<CandidatureDto> RefuserParDirectionAsync(Guid candidatureId, string commentaire);
+
     Task<CandidatureSuiviDto?> GetCandidatureSuiviAsync(Guid candidatureId);
 
     /// <summary>
-    /// Transmet une candidature acceptée à la Direction
+    /// Documents.Service appelle cet endpoint quand tous les documents sont validés.
+    /// Met DestinataireTransmission = "DossierAccepte".
     /// </summary>
-    Task<bool> TransmitToDirectionAsync(Guid candidatureId);
+    Task<CandidatureDto> MarquerDossierAccepteAsync(Guid candidatureId);
 }

@@ -34,7 +34,7 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .HasMaxLength(50)
             .HasConversion(
                 v => v.ToString(),
-                v => Enum.Parse<TypeDocument>(v));
+                v => ParseTypeDocument(v));
 
         // Fichier
         builder.Property(d => d.NomFichier)
@@ -75,6 +75,13 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
                 v => v.ToString(),
                 v => Enum.Parse<DocumentStatut>(v));
 
+        // Destinataire actuel (Encadrant / Centre)
+        builder.Property(d => d.DestinataireActuel)
+            .HasColumnName("DestinataireActuel")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("Encadrant");
+
         // Vérificateur
         builder.Property(d => d.VerificateurId)
             .HasColumnName("VerificateurId");
@@ -109,6 +116,12 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .IsRequired()
             .HasDefaultValue(1);
 
+        builder.Property(d => d.DestinataireActuel)
+            .HasColumnName("DestinataireActuel")
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("Encadrant");
+
         // Index pour les requêtes fréquentes
         builder.HasIndex(d => d.StagiaireId)
             .HasDatabaseName("IX_Document_StagiaireId");
@@ -130,5 +143,12 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
 
         // Nom de la table
         builder.ToTable("Documents", "dbo");
+    }
+
+    private static TypeDocument ParseTypeDocument(string v)
+    {
+        if (Enum.TryParse<TypeDocument>(v, out var result))
+            return result;
+        return TypeDocument.CV; // fallback pour les anciennes valeurs supprimées
     }
 }

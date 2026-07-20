@@ -118,4 +118,16 @@ public class CandidatureRepository : ICandidatureRepository
             .OrderByDescending(c => c.DateCreation)
             .ToListAsync();
     }
+
+    /// <summary>
+    /// Récupère les candidatures d'un département
+    /// </summary>
+    public async Task<IEnumerable<Candidature>> GetByDepartementIdAsync(int departementId)
+    {
+        return await _context.Candidatures
+            .AsNoTracking()
+            .Where(c => c.DepartementId == departementId)
+            .OrderByDescending(c => c.DateCreation)
+            .ToListAsync();
+    }
 }

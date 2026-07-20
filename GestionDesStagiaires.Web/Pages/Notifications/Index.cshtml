@@ -1,0 +1,106 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Notifications.IndexModel
+
+@{
+    ViewData["Title"] = "Mes Notifications";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-bell"></i> Mes Notifications</h1>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary btn-sm" onclick="toutMarquerLu()">
+                <i class="bi bi-check-all"></i> Tout marquer comme lu
+            </button>
+        </div>
+    </div>
+
+    <div id="loadingNotifs" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Chargement…</p>
+    </div>
+
+    <div id="emptyNotifs" class="text-center py-5 d-none text-muted">
+        <i class="bi bi-bell-slash fs-1"></i>
+        <p class="mt-2">Aucune notification pour l'instant.</p>
+    </div>
+
+    <div id="notifsContainer" class="d-none"></div>
+</div>
+
+@section Scripts {
+<script>
+    const API = '@Model.NotificationsApiUrl';
+    const TOKEN = '@Model.JwtToken';
+
+    async function chargerNotifications() {
+        try {
+            const res = await fetch(`${API}/api/v1/notifications/me`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            document.getElementById('loadingNotifs').classList.add('d-none');
+
+            if (!res.ok) { showEmpty(); return; }
+
+            const json = await res.json();
+            const notifs = json.data ?? [];
+
+            if (notifs.length === 0) { showEmpty(); return; }
+
+            const container = document.getElementById('notifsContainer');
+            container.innerHTML = '';
+            notifs.forEach(n => {
+                const isUnread = !n.estLue;
+                const icon = n.type === 'CandidatureAcceptee' ? 'bi-check-circle-fill text-success'
+                           : n.type === 'CorrectionDocumentDemandee' ? 'bi-exclamation-circle-fill text-warning'
+                           : 'bi-info-circle-fill text-info';
+                const date = new Date(n.dateCreation).toLocaleString('fr-FR');
+                container.innerHTML += `
+                <div class="card mb-2 ${isUnread ? 'border-primary' : ''}" id="notif-${n.id}">
+                    <div class="card-body d-flex gap-3 align-items-start">
+                        <i class="bi ${icon} fs-4 mt-1"></i>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <strong>${n.titre}</strong>
+                                <small class="text-muted">${date}</small>
+                            </div>
+                            <p class="mb-1">${n.message}</p>
+                            ${n.type === 'CandidatureAcceptee' ? `<a href="/documents" class="btn btn-sm btn-success mt-1"><i class="bi bi-upload"></i> Envoyer mes documents</a>` : ''}
+                            ${n.type === 'CorrectionDocumentDemandee' ? `<a href="/documents" class="btn btn-sm btn-warning mt-1"><i class="bi bi-arrow-repeat"></i> Soumettre la correction</a>` : ''}
+                        </div>
+                        ${isUnread ? `<button class="btn btn-sm btn-outline-secondary" onclick="marquerLu('${n.id}')"><i class="bi bi-check"></i></button>` : ''}
+                    </div>
+                </div>`;
+            });
+            container.classList.remove('d-none');
+        } catch {
+            document.getElementById('loadingNotifs').classList.add('d-none');
+            showEmpty();
+        }
+    }
+
+    function showEmpty() {
+        document.getElementById('emptyNotifs').classList.remove('d-none');
+    }
+
+    async function marquerLu(id) {
+        await fetch(`${API}/api/v1/notifications/${id}/lire`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        chargerNotifications();
+    }
+
+    async function toutMarquerLu() {
+        await fetch(`${API}/api/v1/notifications/me/tout-lire`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
+        chargerNotifications();
+    }
+
+    document.addEventListener('DOMContentLoaded', chargerNotifications);
+</script>
+}

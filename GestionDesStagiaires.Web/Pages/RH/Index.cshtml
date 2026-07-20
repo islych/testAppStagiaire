@@ -1,0 +1,299 @@
+@page
+@model GestionDesStagiaires.Web.Pages.RH.IndexModel
+@{
+    ViewData["Title"] = "Espace RH";
+    var enAttente = Model.Candidatures.Where(c => c.DestinataireTransmission == "RH").ToList();
+    var integres  = Model.Candidatures.Where(c => c.DestinataireTransmission == "RH_Integre").ToList();
+}
+
+<div class="container-fluid py-4" style="max-width:1100px">
+    <h2 class="mb-1"><i class="bi bi-people text-success"></i> Espace Ressources Humaines</h2>
+    <p class="text-muted mb-4">Vérifiez les documents, validez ou demandez des corrections, puis intégrez le stagiaire</p>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!enAttente.Any() && !integres.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucun dossier transmis au service RH pour le moment.</p>
+        </div>
+    }
+
+    @if (enAttente.Any())
+    {
+        <h6 class="text-uppercase text-muted small mb-2">
+            <i class="bi bi-clock text-warning"></i> Dossiers à traiter (@enAttente.Count)
+        </h6>
+        <div class="row row-cols-1 g-3 mb-4">
+            @foreach (var c in enAttente)
+            {
+                var nom = Model.NomsStagiaires.ContainsKey(c.StagiaireId) ? Model.NomsStagiaires[c.StagiaireId] : $"#{c.StagiaireId}";
+                <div class="col">
+                    <div class="card border-success border-start border-3 shadow-sm">
+                        <div class="card-header bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div>
+                                <strong>@nom</strong>
+                                <small class="text-muted ms-2">@c.DepartementNom / @c.SpecialiteNom — @c.DureeStageMois mois</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <form method="post" asp-page-handler="Integrer">
+                                    <input type="hidden" name="id" value="@c.Id">
+                                    <button type="submit" class="btn btn-success btn-sm"
+                                            onclick="return confirm('Intégrer le stagiaire @nom dans le système ?')">
+                                        <i class="bi bi-person-check"></i> Intégrer le stagiaire
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                        onclick="ouvrirRefus('@c.Id', '@nom')"
+                                        data-bs-toggle="modal" data-bs-target="#modalRefus">
+                                    <i class="bi bi-x-circle"></i> Refuser
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="docs-loading-@c.StagiaireId" class="text-center py-3 text-muted small">
+                                <div class="spinner-border spinner-border-sm"></div> Chargement…
+                            </div>
+                            <div id="docs-empty-@c.StagiaireId" class="text-center py-3 text-muted small d-none">
+                                <i class="bi bi-inbox"></i> Aucun document.
+                            </div>
+                            <table class="table table-sm table-hover mb-0 d-none" id="docs-table-@c.StagiaireId">
+                                <thead class="table-light">
+                                    <tr><th>Type</th><th>Fichier</th><th>Statut</th><th>Commentaire</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="docs-body-@c.StagiaireId"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (integres.Any())
+    {
+        <h6 class="text-uppercase text-muted small mb-2 mt-3">
+            <i class="bi bi-check2-all text-secondary"></i> Intégrés (@integres.Count)
+        </h6>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle">
+                <thead class="table-light">
+                    <tr><th>Stagiaire</th><th>Département</th><th>Statut</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in integres)
+                    {
+                        var nom = Model.NomsStagiaires.ContainsKey(c.StagiaireId) ? Model.NomsStagiaires[c.StagiaireId] : $"#{c.StagiaireId}";
+                        <tr>
+                            <td><strong>@nom</strong></td>
+                            <td><small>@c.DepartementNom</small></td>
+                            <td><span class="badge bg-success"><i class="bi bi-person-check"></i> Intégré</span></td>
+                            <td><small>@(c.DateMiseAJour?.ToString("dd/MM/yyyy") ?? "—")</small></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Modal correction document -->
+<div class="modal fade" id="modalCorrection" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil-square text-warning"></i> Demander une correction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="correctionDocId">
+                <p class="mb-1 small text-muted">Document :</p>
+                <p id="correctionDocType" class="fw-semibold mb-3"></p>
+                <label class="form-label small fw-semibold">Commentaire <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="correctionCommentaire" rows="3"
+                          placeholder="Expliquez ce qui doit être corrigé…"></textarea>
+                <div id="correctionAlert" class="mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="envoyerCorrection()">
+                    <i class="bi bi-send"></i> Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal refus -->
+<div class="modal fade" id="modalRefus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Refuser">
+                <input type="hidden" name="id" id="refusId">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-x-circle"></i> Refuser</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Stagiaire : <strong id="refusNom"></strong></p>
+                    <label class="form-label fw-semibold">Motif <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="CommentaireRefus" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirmer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const DOCS_API = '@Model.DocumentsApiUrl';
+    const TOKEN    = '@Model.JwtToken';
+
+    const statusBadge = {
+        'EnAttente':           '<span class="badge bg-warning text-dark">En attente</span>',
+        'Valide':              '<span class="badge bg-success">Validé</span>',
+        'Refuse':              '<span class="badge bg-danger">Correction demandée</span>',
+        'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[id^="docs-loading-"]').forEach(el => {
+            const stagiaireId = parseInt(el.id.replace('docs-loading-', ''));
+            chargerDocs(stagiaireId);
+        });
+    });
+
+    async function chargerDocs(stagiaireId) {
+        const loading = document.getElementById(`docs-loading-${stagiaireId}`);
+        const empty   = document.getElementById(`docs-empty-${stagiaireId}`);
+        const table   = document.getElementById(`docs-table-${stagiaireId}`);
+        const tbody   = document.getElementById(`docs-body-${stagiaireId}`);
+
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/stagiaire/${stagiaireId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            loading.classList.add('d-none');
+            if (!res.ok) { empty.classList.remove('d-none'); return; }
+            const json = await res.json();
+            const docs = json.data ?? [];
+            if (!docs.length) { empty.classList.remove('d-none'); return; }
+
+            tbody.innerHTML = '';
+            docs.forEach(doc => {
+                const badge   = statusBadge[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
+                const comment = doc.commentaireVerificateur
+                    ? `<small class="text-muted">${doc.commentaireVerificateur.substring(0,50)}…</small>`
+                    : '—';
+                const peutAgir = doc.statut === 'EnAttente' || doc.statut === 'EnCorrectionSoumise';
+
+                tbody.innerHTML += `<tr>
+                    <td><small>${doc.typeLibelle ?? doc.type}</small></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width:110px" title="${doc.nomFichier}">${doc.nomFichier}</small></td>
+                    <td>${badge}</td>
+                    <td><small>${comment}</small></td>
+                    <td class="text-nowrap">
+                        <a href="${DOCS_API}/api/v1/documents/${doc.id}/telecharger" target="_blank"
+                           class="btn btn-sm btn-outline-secondary" title="Télécharger">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        ${peutAgir ? `
+                        <button class="btn btn-sm btn-outline-success ms-1" title="Valider"
+                                onclick="validerDoc('${doc.id}', ${stagiaireId})">
+                            <i class="bi bi-check-circle"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning ms-1" title="Demander correction"
+                                onclick="ouvrirModalCorrection('${doc.id}','${(doc.typeLibelle??doc.type).replace(/'/g,"\\'")}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>` : ''}
+                    </td>
+                </tr>`;
+            });
+            table.classList.remove('d-none');
+        } catch {
+            loading?.classList.add('d-none');
+            empty?.classList.remove('d-none');
+        }
+    }
+
+    async function validerDoc(docId, stagiaireId) {
+        if (!confirm('Valider ce document ?')) return;
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/${docId}/valider`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentaire: null })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                document.getElementById(`docs-loading-${stagiaireId}`).classList.remove('d-none');
+                document.getElementById(`docs-table-${stagiaireId}`).classList.add('d-none');
+                document.getElementById(`docs-empty-${stagiaireId}`).classList.add('d-none');
+                chargerDocs(stagiaireId);
+            } else {
+                alert(json.message ?? 'Erreur validation.');
+            }
+        } catch { alert('Impossible de contacter le service Documents.'); }
+    }
+
+    function ouvrirModalCorrection(docId, typeLibelle) {
+        document.getElementById('correctionDocId').value = docId;
+        document.getElementById('correctionDocType').textContent = typeLibelle;
+        document.getElementById('correctionCommentaire').value = '';
+        document.getElementById('correctionAlert').className = 'mt-2 d-none';
+        new bootstrap.Modal(document.getElementById('modalCorrection')).show();
+    }
+
+    async function envoyerCorrection() {
+        const docId      = document.getElementById('correctionDocId').value;
+        const commentaire = document.getElementById('correctionCommentaire').value.trim();
+        const alertEl    = document.getElementById('correctionAlert');
+        if (!commentaire) {
+            alertEl.className = 'mt-2 alert alert-warning';
+            alertEl.textContent = 'Veuillez saisir un commentaire.';
+            return;
+        }
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/${docId}/demander-correction`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentaire })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                bootstrap.Modal.getInstance(document.getElementById('modalCorrection')).hide();
+                location.reload();
+            } else {
+                alertEl.className = 'mt-2 alert alert-danger';
+                alertEl.textContent = json.message ?? 'Erreur.';
+            }
+        } catch {
+            alertEl.className = 'mt-2 alert alert-danger';
+            alertEl.textContent = 'Impossible de contacter le service Documents.';
+        }
+    }
+
+    function ouvrirRefus(id, nom) {
+        document.getElementById('refusId').value = id;
+        document.getElementById('refusNom').textContent = nom;
+    }
+</script>
+}

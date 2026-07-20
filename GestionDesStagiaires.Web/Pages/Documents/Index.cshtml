@@ -35,17 +35,19 @@
                     <h5 class="fw-bold mb-1">Dépôt de documents non disponible</h5>
                     <p class="mb-2">
                         Vous ne pouvez déposer vos documents administratifs qu'après que
-                        <strong>votre candidature a été acceptée par un encadrant</strong>.
+                        <strong>votre candidature a été acceptée par la Direction</strong>.
                     </p>
                     <p class="text-muted small mb-3">
                         Le processus est le suivant :
-                        <span class="badge bg-secondary">1. Déposer une candidature</span>
+                        <span class="badge bg-secondary">1. Candidature</span>
                         <i class="bi bi-arrow-right mx-1"></i>
-                        <span class="badge bg-secondary">2. Acceptation par l'encadrant</span>
+                        <span class="badge bg-secondary">2. Acceptation Direction</span>
                         <i class="bi bi-arrow-right mx-1"></i>
                         <span class="badge bg-danger">3. Dépôt des documents</span>
                         <i class="bi bi-arrow-right mx-1"></i>
-                        <span class="badge bg-secondary">4. Validation Direction</span>
+                        <span class="badge bg-secondary">4. Encadrant → Centre</span>
+                        <i class="bi bi-arrow-right mx-1"></i>
+                        <span class="badge bg-secondary">5. Validation Centre</span>
                     </p>
                     <a href="/candidatures" class="btn btn-outline-warning btn-sm">
                         <i class="bi bi-file-earmark-arrow-up"></i>
@@ -83,9 +85,6 @@
                 <div class="card shadow-sm">
                     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-list-check"></i> Mes documents déposés</h5>
-                        <button class="btn btn-sm btn-light" onclick="chargerDocuments()">
-                            <i class="bi bi-arrow-clockwise"></i> Actualiser
-                        </button>
                     </div>
                     <div class="card-body p-0">
                         <div id="loadingDocs" class="text-center py-4 d-none">
@@ -123,6 +122,7 @@
                     </div>
                     <div class="card-body">
                         <form id="uploadForm" novalidate>
+                            <input type="hidden" id="correctionDocId" value="">
 
                             <!-- Type de document -->
                             <div class="mb-3">
@@ -136,10 +136,8 @@
                                     <option value="Assurance">Attestation d'assurance</option>
                                     <option value="CIN">Carte d'identité (CIN)</option>
                                     <option value="LettreDeRecommandation">Lettre de recommandation</option>
-                                    <option value="RapportDeStage">Rapport de stage</option>
                                     <option value="DemandeManuscrite">Demande manuscrite</option>
-                                    <option value="FicheAppreciation">Fiche d'appréciation</option>
-                                    <option value="FicheDeSynthese">Fiche de synthèse</option>
+                                    <option value="EngagementLegalise">Engagement légalisé</option>
                                 </select>
                             </div>
 
@@ -182,9 +180,11 @@
                     <div class="card-body py-2 px-3">
                         <small class="text-muted d-block mb-1 fw-semibold">Légende des statuts :</small>
                         <span class="badge bg-warning text-dark me-1">En attente</span>
+                        <span class="badge bg-primary me-1">Transmis au Centre</span>
                         <span class="badge bg-success me-1">Validé</span>
-                        <span class="badge bg-danger me-1">Refusé</span>
+                        <span class="badge bg-warning text-dark me-1">Modification demandée</span>
                         <span class="badge bg-info me-1">Correction soumise</span>
+                        <span class="badge bg-danger me-1">Refusé définitivement</span>
                     </div>
                 </div>
             </div>
@@ -198,6 +198,7 @@
 <script>
     const API   = '@Model.DocumentsApiUrl';
     const TOKEN = '@Model.JwtToken';
+    const CANDIDATURE_ID = '@Model.CandidatureAccepteeId';
 
     function getToken() { return TOKEN; }
 
@@ -231,9 +232,11 @@
             docs.forEach(doc => {
                 const badge = {
                     'EnAttente':           '<span class="badge bg-warning text-dark">En attente</span>',
+                    'TransmisAuCentre':    '<span class="badge bg-primary">Transmis au Centre</span>',
                     'Valide':              '<span class="badge bg-success">Validé</span>',
-                    'Refuse':              '<span class="badge bg-danger">Refusé</span>',
-                    'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+                    'Refuse':              '<span class="badge bg-danger">Refusé définitivement</span>',
+                    'DemandeModification': '<span class="badge bg-warning text-dark">Modification demandée</span>',
+                    'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise au Centre</span>',
                 }[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
 
                 const date = new Date(doc.dateDepot).toLocaleDateString('fr-FR');
@@ -253,11 +256,17 @@
                                title="Télécharger">
                                 <i class="bi bi-download"></i>
                             </a>
-                            ${doc.statut === 'Refuse' ? `
+                            ${doc.statut === 'DemandeModification' ? `
                             <button class="btn btn-sm btn-outline-warning ms-1"
-                                    title="Soumettre une correction"
+                                    title="Soumettre une correction au Centre"
                                     onclick="preparerCorrection('${doc.id}', '${doc.type}')">
                                 <i class="bi bi-arrow-repeat"></i>
+                            </button>` : ''}
+                            ${doc.statut === 'EnAttente' || doc.statut === 'DemandeModification' ? `
+                            <button class="btn btn-sm btn-outline-danger ms-1"
+                                    title="Supprimer ce document"
+                                    onclick="supprimerDocument('${doc.id}', '${doc.typeLibelle}')">
+                                <i class="bi bi-trash"></i>
                             </button>` : ''}
                         </td>
                     </tr>`;
@@ -295,6 +304,7 @@
 
         const type  = document.getElementById('typeDocument').value;
         const input = document.getElementById('fichierInput');
+        const correctionId = document.getElementById('correctionDocId').value;
 
         if (!type)  { showAlert('Veuillez sélectionner un type de document.', 'warning'); return; }
         if (!input.files.length) { showAlert('Veuillez sélectionner un fichier.', 'warning'); return; }
@@ -306,9 +316,15 @@
         const formData = new FormData();
         formData.append('fichier', input.files[0]);
         formData.append('type', type);
+        if (CANDIDATURE_ID) formData.append('candidatureId', CANDIDATURE_ID);
+
+        // Si c'est une correction, appeler l'endpoint /corrections/{id}
+        const url = correctionId
+            ? `${API}/api/v1/documents/${correctionId}/corrections`
+            : `${API}/api/v1/documents/upload`;
 
         try {
-            const res = await fetch(`${API}/api/v1/documents/upload`, {
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${TOKEN}` },
                 body: formData
@@ -317,9 +333,11 @@
             const json = await res.json();
 
             if (res.ok && json.success) {
-                showAlert('Document déposé avec succès. Il est en attente de vérification.', 'success');
-                document.getElementById('uploadForm').reset();
-                document.getElementById('fichierInfo').classList.add('d-none');
+                const msg = correctionId
+                    ? 'Correction soumise avec succès. Elle est en attente de vérification.'
+                    : 'Document déposé avec succès. Il est en attente de vérification.';
+                showAlert(msg, 'success');
+                resetForm();
                 chargerDocuments();
             } else {
                 showAlert(json.message ?? 'Erreur lors du dépôt.', 'danger');
@@ -334,13 +352,44 @@
 
     // ─── Correction d'un document refusé ────────────────────────────────────
     function preparerCorrection(docId, type) {
+        document.getElementById('correctionDocId').value = docId;
         document.getElementById('typeDocument').value = type;
         document.getElementById('typeDocument').disabled = true;
-        showAlert('Sélectionnez le nouveau fichier corrigé et cliquez sur "Déposer".', 'info');
+        showAlert('📎 Mode correction : sélectionnez le nouveau fichier corrigé et cliquez sur "Soumettre la correction au Centre".', 'info');
         document.getElementById('uploadZone').scrollIntoView({ behavior: 'smooth' });
         const btn = document.getElementById('btnUpload');
         btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Soumettre la correction';
         btn.classList.replace('btn-danger', 'btn-warning');
+    }
+
+    // ─── Suppression ─────────────────────────────────────────────────────────
+    async function supprimerDocument(docId, typeLibelle) {
+        if (!confirm(`Supprimer le document "${typeLibelle}" ? Cette action est irréversible.`)) return;
+
+        try {
+            const res = await fetch(`${API}/api/v1/documents/${docId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            if (res.ok) {
+                showAlert('Document supprimé.', 'success');
+                chargerDocuments();
+            } else {
+                const json = await res.json().catch(() => ({}));
+                showAlert(json.message ?? 'Erreur lors de la suppression.', 'danger');
+            }
+        } catch {
+            showAlert('Impossible de contacter le service Documents.', 'danger');
+        }
+    }
+
+    function resetForm() {        document.getElementById('correctionDocId').value = '';
+        document.getElementById('uploadForm').reset();
+        document.getElementById('fichierInfo').classList.add('d-none');
+        document.getElementById('typeDocument').disabled = false;
+        const btn = document.getElementById('btnUpload');
+        btn.innerHTML = '<i class="bi bi-upload"></i> Déposer le document';
+        btn.classList.replace('btn-warning', 'btn-danger');
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

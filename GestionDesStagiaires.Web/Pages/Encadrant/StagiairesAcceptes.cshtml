@@ -1,0 +1,187 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Encadrant.StagiairesAcceptesModel
+@{
+    ViewData["Title"] = "Dossiers des stagiaires";
+}
+
+<div class="container-fluid py-4" style="max-width:1100px">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-0"><i class="bi bi-folder2-open text-success"></i> Dossiers des stagiaires</h2>
+            <small class="text-muted">Consultez les documents déposés, puis transmettez le dossier complet au Centre</small>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    @if (!Model.Stagiaires.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucun stagiaire accepté pour le moment.</p>
+        </div>
+    }
+    else
+    {
+   
+
+        <div class="row row-cols-1 g-3">
+            @foreach (var s in Model.Stagiaires)
+            {
+                var dejaTransmis = !string.IsNullOrEmpty(s.DestinataireTransmission) &&
+                                   s.DestinataireTransmission.StartsWith("Centre", StringComparison.OrdinalIgnoreCase);
+                <div class="col">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:42px;height:42px;font-size:1.1rem">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <strong>@s.NomComplet</strong>
+                                    <div><small class="text-muted">@s.Email</small></div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge bg-secondary" id="docCount-@s.StagiaireId">—</span>
+                                @if (dejaTransmis)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check2-all"></i> Transmis au Centre
+                                    </span>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-success"
+                                            onclick="confirmerTransmission('@s.CandidatureId', '@s.NomComplet')">
+                                        <i class="bi bi-send"></i> Transmettre au Centre
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <div id="docs-loading-@s.StagiaireId" class="text-center py-3 text-muted small">
+                                <div class="spinner-border spinner-border-sm"></div> Chargement…
+                            </div>
+                            <div id="docs-empty-@s.StagiaireId" class="text-center py-3 text-muted small d-none">
+                                <i class="bi bi-inbox"></i> Aucun document déposé.
+                            </div>
+                            <table class="table table-sm table-hover mb-0 d-none" id="docs-table-@s.StagiaireId">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Fichier</th>
+                                        <th>Statut</th>
+                                        <th>Commentaire Centre</th>
+                                        <th>Date</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docs-body-@s.StagiaireId"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    const DOCS_API = '@Model.DocumentsApiUrl';
+    const TOKEN    = '@Model.JwtToken';
+
+    const statusBadge = {
+        'EnAttente':           '<span class="badge bg-warning text-dark">En attente</span>',
+        'TransmisAuCentre':    '<span class="badge bg-primary">Transmis au Centre</span>',
+        'Valide':              '<span class="badge bg-success">Validé</span>',
+        'Refuse':              '<span class="badge bg-danger">Refusé</span>',
+        'DemandeModification': '<span class="badge bg-warning text-dark">Modification demandée</span>',
+        'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[id^="docs-loading-"]').forEach(el => {
+            const id = parseInt(el.id.replace('docs-loading-', ''));
+            chargerDocs(id);
+        });
+    });
+
+    async function chargerDocs(stagiaireId) {
+        const loading = document.getElementById(`docs-loading-${stagiaireId}`);
+        const empty   = document.getElementById(`docs-empty-${stagiaireId}`);
+        const table   = document.getElementById(`docs-table-${stagiaireId}`);
+        const tbody   = document.getElementById(`docs-body-${stagiaireId}`);
+        const count   = document.getElementById(`docCount-${stagiaireId}`);
+
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/stagiaire/${stagiaireId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            loading.classList.add('d-none');
+            if (!res.ok) { empty.classList.remove('d-none'); return; }
+            const json = await res.json();
+            const docs = json.data ?? [];
+
+            count.textContent = `${docs.length} doc${docs.length !== 1 ? 's' : ''}`;
+            count.className = docs.length > 0 ? 'badge bg-primary' : 'badge bg-secondary';
+            if (!docs.length) { empty.classList.remove('d-none'); return; }
+
+            tbody.innerHTML = '';
+            docs.forEach(doc => {
+                const badge   = statusBadge[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
+                const comment = doc.commentaireVerificateur
+                    ? `<small class="text-muted fst-italic">${doc.commentaireVerificateur.substring(0,80)}${doc.commentaireVerificateur.length>80?'…':''}</small>`
+                    : '<span class="text-muted">—</span>';
+                const date = new Date(doc.dateDepot).toLocaleDateString('fr-FR');
+
+                tbody.innerHTML += `
+                <tr>
+                    <td><small>${doc.typeLibelle ?? doc.type}</small></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width:120px" title="${doc.nomFichier}">${doc.nomFichier}</small></td>
+                    <td>${badge}</td>
+                    <td>${comment}</td>
+                    <td><small>${date}</small></td>
+                    <td>
+                        <a href="${DOCS_API}/api/v1/documents/${doc.id}/telecharger"
+                           target="_blank" class="btn btn-sm btn-outline-secondary" title="Télécharger">
+                            <i class="bi bi-download"></i>
+                        </a>
+                    </td>
+                </tr>`;
+            });
+            table.classList.remove('d-none');
+        } catch {
+            loading?.classList.add('d-none');
+            empty?.classList.remove('d-none');
+        }
+    }
+
+    // ── Transmettre au Centre ────────────────────────────────────────────────
+    async function confirmerTransmission(candidatureId, nomStagiaire) {
+        if (!confirm(`Transmettre le dossier de ${nomStagiaire} au Centre ?\n\nTous les documents en attente seront envoyés au Centre pour vérification.`))
+            return;
+
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/candidature/${candidatureId}/transmettre-centre`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                location.reload();
+            } else {
+                alert(json.message ?? 'Erreur lors de la transmission.');
+            }
+        } catch {
+            alert('Impossible de contacter le service Documents.');
+        }
+    }
+</script>
+}

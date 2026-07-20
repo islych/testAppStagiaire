@@ -1,0 +1,332 @@
+﻿@page
+@model GestionDesStagiaires.Web.Pages.Centre.IndexModel
+@{
+    ViewData["Title"] = "Espace Centre";
+}
+
+<div class="container-fluid py-4" style="max-width:1100px">
+    <h2 class="mb-1"><i class="bi bi-building text-primary"></i> Espace Centre</h2>
+    <p class="text-muted mb-4">Vérifiez les documents transmis par les encadrants, puis validez, refusez ou demandez des corrections.</p>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.DossiersCentre.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucun dossier transmis au Centre pour le moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 g-3">
+            @foreach (var d in Model.DossiersCentre)
+            {
+                <div class="col">
+                    <div class="card shadow-sm border-start border-primary border-3">
+                        <div class="card-header bg-white d-flex align-items-center justify-content-between flex-wrap gap-2 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:40px;height:40px">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div>
+                                    <strong>@d.NomComplet</strong>
+                                    <div><small class="text-muted">@d.Email &bull; @d.DepartementNom / @d.SpecialiteNom</small></div>
+                                </div>
+                            </div>
+                            <span class="badge bg-secondary" id="docCount-@d.StagiaireId">chargement…</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="docs-loading-@d.StagiaireId" class="text-center py-3 text-muted small">
+                                <div class="spinner-border spinner-border-sm"></div> Chargement…
+                            </div>
+                            <div id="docs-empty-@d.StagiaireId" class="text-center py-3 text-muted small d-none">
+                                <i class="bi bi-inbox"></i> Aucun document recu.
+                            </div>
+                            <table class="table table-sm table-hover mb-0 d-none" id="docs-table-@d.StagiaireId">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Type</th><th>Fichier</th><th>Statut</th>
+                                        <th>Commentaire</th><th>Date</th><th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="docs-body-@d.StagiaireId"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal : demander modification -->
+<div class="modal fade" id="modalModification" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil-square text-warning"></i> Demander une modification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modifDocId">
+                <p class="mb-1 small text-muted">Document :</p>
+                <p id="modifDocType" class="fw-semibold mb-3"></p>
+                <label class="form-label small fw-semibold">
+                    Commentaire pour le stagiaire <span class="text-danger">*</span>
+                </label>
+                <textarea class="form-control" id="modifCommentaire" rows="3"
+                          placeholder="Expliquez precisement ce qui doit etre corrige…"></textarea>
+                <small class="text-muted">Le stagiaire recevra ce commentaire et pourra soumettre une correction directement au Centre.</small>
+                <div id="modifAlert" class="mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-warning btn-sm" onclick="envoyerModification()">
+                    <i class="bi bi-send"></i> Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : refus definitif -->
+<div class="modal fade" id="modalRefus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-x-circle"></i> Refus definitif</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="refusDocId">
+                <p class="mb-1 small text-muted">Document :</p>
+                <p id="refusDocType" class="fw-semibold mb-3"></p>
+                <div class="alert alert-warning py-2 small">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Cette action est definitive. Le stagiaire ne pourra pas resoumettre ce document.
+                </div>
+                <label class="form-label small fw-semibold">Motif <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="refusCommentaire" rows="3"
+                          placeholder="Expliquez le motif du refus definitif…"></textarea>
+                <div id="refusAlert" class="mt-2 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="envoyerRefus()">
+                    <i class="bi bi-x-circle"></i> Confirmer le refus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const DOCS_API = '@Model.DocumentsApiUrl';
+    const TOKEN    = '@Model.JwtToken';
+
+    const statusBadge = {
+        'TransmisAuCentre':    '<span class="badge bg-primary">Transmis au Centre</span>',
+        'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+        'DemandeModification': '<span class="badge bg-warning text-dark">Modification demandee</span>',
+        'Valide':              '<span class="badge bg-success">Valide</span>',
+        'Refuse':              '<span class="badge bg-danger">Refuse</span>',
+        'EnAttente':           '<span class="badge bg-secondary">En attente encadrant</span>',
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[id^="docs-loading-"]').forEach(el => {
+            const stagiaireId = parseInt(el.id.replace('docs-loading-', ''));
+            chargerDocs(stagiaireId);
+        });
+    });
+
+    async function chargerDocs(stagiaireId) {
+        const loading = document.getElementById(`docs-loading-${stagiaireId}`);
+        const empty   = document.getElementById(`docs-empty-${stagiaireId}`);
+        const table   = document.getElementById(`docs-table-${stagiaireId}`);
+        const tbody   = document.getElementById(`docs-body-${stagiaireId}`);
+        const count   = document.getElementById(`docCount-${stagiaireId}`);
+
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/stagiaire/${stagiaireId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            loading.classList.add('d-none');
+            if (!res.ok) { empty.classList.remove('d-none'); return; }
+            const json = await res.json();
+            const docs = json.data ?? [];
+
+            const docsCentre = docs.filter(d =>
+                d.destinataireActuel === 'Centre' ||
+                d.statut === 'TransmisAuCentre' ||
+                d.statut === 'EnCorrectionSoumise' ||
+                d.statut === 'Valide' ||
+                d.statut === 'Refuse' ||
+                d.statut === 'DemandeModification'
+            );
+
+            count.textContent = `${docsCentre.length} doc${docsCentre.length !== 1 ? 's' : ''}`;
+            count.className = docsCentre.length > 0 ? 'badge bg-primary' : 'badge bg-secondary';
+
+            if (!docsCentre.length) { empty.classList.remove('d-none'); return; }
+
+            tbody.innerHTML = '';
+            docsCentre.forEach(doc => {
+                const badge   = statusBadge[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
+                const comment = doc.commentaireVerificateur
+                    ? `<small class="text-muted fst-italic">${doc.commentaireVerificateur.substring(0,70)}${doc.commentaireVerificateur.length>70?'...':''}</small>`
+                    : '<span class="text-muted small">-</span>';
+                const date    = new Date(doc.dateDepot).toLocaleDateString('fr-FR');
+                const peutAgir = doc.statut === 'TransmisAuCentre' || doc.statut === 'EnCorrectionSoumise';
+                const typeLabel = (doc.typeLibelle ?? doc.type).replace(/'/g, "\\'");
+
+                tbody.innerHTML += `
+                <tr>
+                    <td><small>${doc.typeLibelle ?? doc.type}</small></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width:110px" title="${doc.nomFichier}">${doc.nomFichier}</small></td>
+                    <td>${badge}</td>
+                    <td>${comment}</td>
+                    <td><small>${date}</small></td>
+                    <td class="text-nowrap">
+                        <a href="${DOCS_API}/api/v1/documents/${doc.id}/telecharger"
+                           target="_blank" class="btn btn-sm btn-outline-secondary" title="Telecharger">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        ${peutAgir ? `
+                        <button class="btn btn-sm btn-outline-success ms-1" title="Valider"
+                                onclick="validerDoc('${doc.id}', ${stagiaireId})">
+                            <i class="bi bi-check-circle"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning ms-1" title="Demander modification"
+                                onclick="ouvrirModification('${doc.id}', '${typeLabel}')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" title="Refus definitif"
+                                onclick="ouvrirRefus('${doc.id}', '${typeLabel}')">
+                            <i class="bi bi-x-circle"></i>
+                        </button>` : ''}
+                    </td>
+                </tr>`;
+            });
+            table.classList.remove('d-none');
+        } catch {
+            loading?.classList.add('d-none');
+            empty?.classList.remove('d-none');
+        }
+    }
+
+    async function validerDoc(docId, stagiaireId) {
+        if (!confirm('Valider ce document ?')) return;
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/${docId}/valider`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentaire: null })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                rechargerDocs(stagiaireId);
+            } else {
+                alert(json.message ?? 'Erreur validation.');
+            }
+        } catch { alert('Impossible de contacter le service Documents.'); }
+    }
+
+    function ouvrirModification(docId, typeLabel) {
+        document.getElementById('modifDocId').value = docId;
+        document.getElementById('modifDocType').textContent = typeLabel;
+        document.getElementById('modifCommentaire').value = '';
+        document.getElementById('modifAlert').className = 'mt-2 d-none';
+        new bootstrap.Modal(document.getElementById('modalModification')).show();
+    }
+
+    async function envoyerModification() {
+        const docId      = document.getElementById('modifDocId').value;
+        const commentaire = document.getElementById('modifCommentaire').value.trim();
+        const alertEl    = document.getElementById('modifAlert');
+        if (commentaire.length < 10) {
+            alertEl.className = 'mt-2 alert alert-warning';
+            alertEl.textContent = 'Le commentaire doit contenir au moins 10 caracteres.';
+            return;
+        }
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/${docId}/demander-modification`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentaire })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                bootstrap.Modal.getInstance(document.getElementById('modalModification')).hide();
+                location.reload();
+            } else {
+                alertEl.className = 'mt-2 alert alert-danger';
+                alertEl.textContent = json.message ?? 'Erreur.';
+            }
+        } catch {
+            alertEl.className = 'mt-2 alert alert-danger';
+            alertEl.textContent = 'Impossible de contacter le service Documents.';
+        }
+    }
+
+    function ouvrirRefus(docId, typeLabel) {
+        document.getElementById('refusDocId').value = docId;
+        document.getElementById('refusDocType').textContent = typeLabel;
+        document.getElementById('refusCommentaire').value = '';
+        document.getElementById('refusAlert').className = 'mt-2 d-none';
+        new bootstrap.Modal(document.getElementById('modalRefus')).show();
+    }
+
+    async function envoyerRefus() {
+        const docId      = document.getElementById('refusDocId').value;
+        const commentaire = document.getElementById('refusCommentaire').value.trim();
+        const alertEl    = document.getElementById('refusAlert');
+        if (commentaire.length < 10) {
+            alertEl.className = 'mt-2 alert alert-warning';
+            alertEl.textContent = 'Le motif doit contenir au moins 10 caracteres.';
+            return;
+        }
+        try {
+            const res = await fetch(`${DOCS_API}/api/v1/documents/${docId}/refuser`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ commentaireRefus: commentaire })
+            });
+            const json = await res.json();
+            if (res.ok && json.success) {
+                bootstrap.Modal.getInstance(document.getElementById('modalRefus')).hide();
+                location.reload();
+            } else {
+                alertEl.className = 'mt-2 alert alert-danger';
+                alertEl.textContent = json.message ?? 'Erreur.';
+            }
+        } catch {
+            alertEl.className = 'mt-2 alert alert-danger';
+            alertEl.textContent = 'Impossible de contacter le service Documents.';
+        }
+    }
+
+    function rechargerDocs(stagiaireId) {
+        document.getElementById(`docs-loading-${stagiaireId}`)?.classList.remove('d-none');
+        document.getElementById(`docs-table-${stagiaireId}`)?.classList.add('d-none');
+        document.getElementById(`docs-empty-${stagiaireId}`)?.classList.add('d-none');
+        chargerDocs(stagiaireId);
+    }
+</script>
+}

@@ -63,6 +63,12 @@ public class Document
     public DocumentStatut Statut { get; set; } = DocumentStatut.EnAttente;
 
     /// <summary>
+    /// Destinataire actuel du document : "Encadrant" (initial) ou "Centre" (après transmission)
+    /// Détermine qui peut agir sur le document
+    /// </summary>
+    public string DestinataireActuel { get; set; } = "Encadrant";
+
+    /// <summary>
     /// Identifiant du vérificateur (encadrant / RH / Centre) qui a traité le document
     /// </summary>
     public int? VerificateurId { get; set; }

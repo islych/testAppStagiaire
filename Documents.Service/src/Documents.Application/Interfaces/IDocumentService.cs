@@ -24,7 +24,7 @@ public interface IDocumentService
         string contentType,
         string jwtToken);
 
-    /// <summary>Soumet une correction (nouvelle version) pour un document refusé</summary>
+    /// <summary>Soumet une correction (nouvelle version) pour un document en DemandeModification — va directement au Centre</summary>
     Task<DocumentDto> SoumettreCorrectionsAsync(
         Guid documentOriginalId,
         int stagiaireId,
@@ -36,11 +36,17 @@ public interface IDocumentService
         long tailleFichierOctets,
         string contentType);
 
-    /// <summary>Valide un document (Encadrant / RH / Centre)</summary>
-    Task<DocumentDto> ValiderDocumentAsync(Guid documentId, int verificateurId, string? commentaire);
+    /// <summary>L'encadrant transmet tous les documents d'un stagiaire au Centre (par candidatureId)</summary>
+    Task<IEnumerable<DocumentDto>> TransmettreAuCentreAsync(Guid candidatureId, int encadrantId);
 
-    /// <summary>Refuse un document avec un commentaire obligatoire</summary>
+    /// <summary>Valide un document (Centre uniquement après transmission)</summary>
+    Task<DocumentDto> ValiderDocumentAsync(Guid documentId, int verificateurId, string? commentaire, string jwtToken);
+
+    /// <summary>Refuse définitivement un document (Centre uniquement)</summary>
     Task<DocumentDto> RefuserDocumentAsync(Guid documentId, int verificateurId, string commentaireRefus);
+
+    /// <summary>Le Centre demande des modifications avec un commentaire — stagiaire corrige et renvoie directement au Centre</summary>
+    Task<DocumentDto> DemanderModificationAsync(Guid documentId, int centreUserId, string commentaire);
 
     /// <summary>Récupère un document par son ID</summary>
     Task<DocumentDto?> GetDocumentByIdAsync(Guid id);
@@ -56,4 +62,7 @@ public interface IDocumentService
 
     /// <summary>Récupère les documents par statut</summary>
     Task<IEnumerable<DocumentDto>> GetDocumentsByStatutAsync(DocumentStatut statut);
+
+    /// <summary>Supprime un document EnAttente (stagiaire propriétaire uniquement)</summary>
+    Task SupprimerDocumentAsync(Guid documentId, int stagiaireId);
 }

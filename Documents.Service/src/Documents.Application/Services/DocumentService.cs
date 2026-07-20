@@ -99,8 +99,8 @@ public class DocumentService : IDocumentService
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Soumet une nouvelle version d'un document refusé.
-    /// L'ancienne version est marquée comme non courante.
+    /// Soumet une nouvelle version d'un document en DemandeModification.
+    /// La correction va DIRECTEMENT au Centre, sans repasser par l'encadrant.
     /// </summary>
     public async Task<DocumentDto> SoumettreCorrectionsAsync(
         Guid documentOriginalId,
@@ -113,19 +113,17 @@ public class DocumentService : IDocumentService
         long tailleFichierOctets,
         string contentType)
     {
-        // Vérifier que le document original existe et est bien refusé
         var original = await _repository.GetByIdAsync(documentOriginalId)
             ?? throw new DocumentNotFoundException(documentOriginalId);
 
-        if (original.Statut != DocumentStatut.Refuse)
+        if (original.Statut != DocumentStatut.DemandeModification)
             throw new ApplicationException(
-                "Seul un document refusé peut faire l'objet d'une correction.");
+                "Seul un document avec une demande de modification peut faire l'objet d'une correction.");
 
         if (original.StagiaireId != stagiaireId)
             throw new ApplicationException(
                 "Vous n'êtes pas autorisé à soumettre une correction pour ce document.");
 
-        // Valider la nouvelle version
         var command = new UploadDocumentCommand(
             stagiaireId, original.CandidatureId, type,
             nomFichier, nomFichierStockage, cheminFichier,
@@ -140,7 +138,7 @@ public class DocumentService : IDocumentService
         original.DateMiseAJour = DateTime.UtcNow;
         await _repository.UpdateAsync(original);
 
-        // Créer la nouvelle version
+        // Nouvelle version → va directement au Centre
         var correction = new Document
         {
             Id = Guid.NewGuid(),
@@ -154,6 +152,7 @@ public class DocumentService : IDocumentService
             TailleFichierOctets = tailleFichierOctets,
             ContentType = contentType,
             Statut = DocumentStatut.EnCorrectionSoumise,
+            DestinataireActuel = "Centre", // ← Directement au Centre, pas à l'encadrant
             EstVersionCourante = true,
             DocumentPrecedentId = documentOriginalId,
             Version = original.Version + 1,
@@ -162,20 +161,55 @@ public class DocumentService : IDocumentService
 
         var created = await _repository.CreateAsync(correction);
 
-        // Notifier l'encadrant de la correction
-        await _notificationService.NotifyCorrectionSoumiseAsync(created.Id, stagiaireId);
+        // Notifier le Centre (pas l'encadrant)
+        await _notificationService.NotifyCorrectionSoumiseCentreAsync(created.Id, stagiaireId);
 
         return MapToDto(created);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // VALIDER
+    // TRANSMETTRE AU CENTRE
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Valide un document (Encadrant / RH / Centre)
+    /// L'encadrant transmet tous les documents EnAttente d'un stagiaire au Centre.
+    /// Seul l'encadrant peut appeler cette méthode, et uniquement pour les docs EnAttente.
     /// </summary>
-    public async Task<DocumentDto> ValiderDocumentAsync(Guid documentId, int verificateurId, string? commentaire)
+    public async Task<IEnumerable<DocumentDto>> TransmettreAuCentreAsync(Guid candidatureId, int encadrantId)
+    {
+        if (candidatureId == Guid.Empty)
+            throw new ApplicationException("L'identifiant de la candidature est invalide.");
+
+        var documents = await _repository.GetByCandidatureIdAsync(candidatureId);
+        var docsEnAttente = documents.Where(d => d.Statut == DocumentStatut.EnAttente).ToList();
+
+        if (!docsEnAttente.Any())
+            throw new ApplicationException(
+                "Aucun document en attente à transmettre. Tous les documents sont déjà traités ou aucun document n'a été déposé.");
+
+        var transmis = new List<Document>();
+        foreach (var doc in docsEnAttente)
+        {
+            doc.Statut = DocumentStatut.TransmisAuCentre;
+            doc.DestinataireActuel = "Centre";
+            doc.VerificateurId = encadrantId;
+            doc.DateMiseAJour = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(doc);
+            transmis.Add(updated);
+        }
+
+        // Notifier le Centre une seule fois pour le dossier
+        if (transmis.Any())
+            await _notificationService.NotifyDossierTransmisAuCentreAsync(transmis.First().Id, transmis.First().StagiaireId);
+
+        return transmis.Select(MapToDto);
+    }
+
+    /// <summary>
+    /// Le Centre valide (accepte) un document.
+    /// Si tous les documents de la candidature sont validés, le dossier est automatiquement accepté.
+    /// </summary>
+    public async Task<DocumentDto> ValiderDocumentAsync(Guid documentId, int verificateurId, string? commentaire, string jwtToken)
     {
         var command = new ValiderDocumentCommand(documentId, verificateurId, commentaire);
         var validationResult = new ValiderDocumentValidator().Validate(command);
@@ -185,32 +219,45 @@ public class DocumentService : IDocumentService
         var document = await _repository.GetByIdAsync(documentId)
             ?? throw new DocumentNotFoundException(documentId);
 
-        // Seuls les documents EnAttente ou EnCorrectionSoumise peuvent être validés
-        if (document.Statut != DocumentStatut.EnAttente &&
+        if (document.Statut != DocumentStatut.TransmisAuCentre &&
             document.Statut != DocumentStatut.EnCorrectionSoumise)
             throw new ApplicationException(
-                $"Le document ne peut pas être validé car il a le statut '{document.Statut}'.");
+                $"Ce document ne peut pas être validé (statut actuel : '{document.Statut}'). " +
+                "Seuls les documents transmis au Centre ou en correction soumise peuvent être validés.");
 
         document.Statut = DocumentStatut.Valide;
+        document.DestinataireActuel = "Centre";
         document.VerificateurId = verificateurId;
         document.CommentaireVerificateur = commentaire;
         document.DateValidation = DateTime.UtcNow;
         document.DateMiseAJour = DateTime.UtcNow;
 
         var updated = await _repository.UpdateAsync(document);
-
-        // Notifier le stagiaire
         await _notificationService.NotifyDocumentValideAsync(updated.Id, updated.StagiaireId);
+
+        // ── Vérification automatique : tous les docs de la candidature sont-ils validés ? ──
+        if (document.CandidatureId.HasValue)
+        {
+            var tousLesDocs = await _repository.GetByCandidatureIdAsync(document.CandidatureId.Value);
+            var tousValides = tousLesDocs.Any() &&
+                              tousLesDocs.All(d => d.Statut == DocumentStatut.Valide);
+
+            if (tousValides)
+            {
+                await _candidaturesClient.MarquerDossierAccepteAsync(
+                    document.CandidatureId.Value, jwtToken);
+            }
+        }
 
         return MapToDto(updated);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // REFUSER
+    // REFUSER définitivement (Centre uniquement)
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Refuse un document avec un commentaire obligatoire
+    /// Le Centre refuse définitivement un document.
     /// </summary>
     public async Task<DocumentDto> RefuserDocumentAsync(Guid documentId, int verificateurId, string commentaireRefus)
     {
@@ -222,23 +269,73 @@ public class DocumentService : IDocumentService
         var document = await _repository.GetByIdAsync(documentId)
             ?? throw new DocumentNotFoundException(documentId);
 
-        if (document.Statut != DocumentStatut.EnAttente &&
+        if (document.Statut != DocumentStatut.TransmisAuCentre &&
             document.Statut != DocumentStatut.EnCorrectionSoumise)
             throw new ApplicationException(
-                $"Le document ne peut pas être refusé car il a le statut '{document.Statut}'.");
+                $"Ce document ne peut pas être refusé (statut actuel : '{document.Statut}').");
 
         document.Statut = DocumentStatut.Refuse;
+        document.DestinataireActuel = "Centre";
         document.VerificateurId = verificateurId;
         document.CommentaireVerificateur = commentaireRefus;
         document.DateValidation = DateTime.UtcNow;
         document.DateMiseAJour = DateTime.UtcNow;
 
         var updated = await _repository.UpdateAsync(document);
-
-        // Notifier le stagiaire
         await _notificationService.NotifyDocumentRefuseAsync(updated.Id, updated.StagiaireId, commentaireRefus);
 
         return MapToDto(updated);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DEMANDER MODIFICATION (Centre uniquement)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Le Centre demande des modifications sur un document.
+    /// Le stagiaire est notifié et ses corrections iront directement au Centre.
+    /// </summary>
+    public async Task<DocumentDto> DemanderModificationAsync(Guid documentId, int centreUserId, string commentaire)
+    {
+        if (string.IsNullOrWhiteSpace(commentaire) || commentaire.Length < 10)
+            throw new ApplicationException("Le commentaire doit contenir au moins 10 caractères.");
+
+        var document = await _repository.GetByIdAsync(documentId)
+            ?? throw new DocumentNotFoundException(documentId);
+
+        if (document.Statut != DocumentStatut.TransmisAuCentre &&
+            document.Statut != DocumentStatut.EnCorrectionSoumise)
+            throw new ApplicationException(
+                $"Ce document ne peut pas faire l'objet d'une demande de modification (statut : '{document.Statut}').");
+
+        document.Statut = DocumentStatut.DemandeModification;
+        document.DestinataireActuel = "Stagiaire"; // retourne au stagiaire pour correction
+        document.VerificateurId = centreUserId;
+        document.CommentaireVerificateur = commentaire;
+        document.DateValidation = DateTime.UtcNow;
+        document.DateMiseAJour = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(document);
+        await _notificationService.NotifyModificationDemandeeAsync(updated.Id, updated.StagiaireId, commentaire);
+
+        return MapToDto(updated);
+    }
+
+    public async Task SupprimerDocumentAsync(Guid documentId, int stagiaireId)
+    {
+        var document = await _repository.GetByIdAsync(documentId)
+            ?? throw new DocumentNotFoundException(documentId);
+
+        if (document.StagiaireId != stagiaireId)
+            throw new ApplicationException("Vous n'êtes pas autorisé à supprimer ce document.");
+
+        // Ne peut supprimer que si le document n'a pas encore été transmis au Centre ou validé
+        if (document.Statut == DocumentStatut.Valide ||
+            document.Statut == DocumentStatut.TransmisAuCentre ||
+            document.Statut == DocumentStatut.EnCorrectionSoumise)
+            throw new ApplicationException("Ce document ne peut plus être supprimé (déjà transmis au Centre ou validé).");
+
+        await _repository.DeleteAsync(documentId);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -316,6 +413,7 @@ public class DocumentService : IDocumentService
         ContentType = document.ContentType,
         Statut = document.Statut,
         StatutLibelle = GetStatutLibelle(document.Statut),
+        DestinataireActuel = document.DestinataireActuel,
         VerificateurId = document.VerificateurId,
         CommentaireVerificateur = document.CommentaireVerificateur,
         DateDepot = document.DateDepot,
@@ -328,25 +426,24 @@ public class DocumentService : IDocumentService
 
     private static string GetTypeLibelle(TypeDocument type) => type switch
     {
-        TypeDocument.CV => "Curriculum Vitae",
+        TypeDocument.CV => "Curriculum Vitae (CV)",
         TypeDocument.ConventionDeStage => "Convention de stage",
         TypeDocument.Assurance => "Attestation d'assurance",
-        TypeDocument.CIN => "Carte d'identité nationale",
+        TypeDocument.CIN => "Carte d'identité (CIN)",
         TypeDocument.LettreDeRecommandation => "Lettre de recommandation",
-        TypeDocument.RapportDeStage => "Rapport de stage",
-        TypeDocument.AttestationDeStage => "Attestation de stage",
         TypeDocument.DemandeManuscrite => "Demande manuscrite",
-        TypeDocument.FicheAppreciation => "Fiche d'appréciation",
-        TypeDocument.FicheDeSynthese => "Fiche de synthèse",
+        TypeDocument.EngagementLegalise => "Engagement légalisé",
         _ => type.ToString()
     };
 
     private static string GetStatutLibelle(DocumentStatut statut) => statut switch
     {
-        DocumentStatut.EnAttente => "En attente de vérification",
-        DocumentStatut.Valide => "Validé",
-        DocumentStatut.Refuse => "Refusé — correction demandée",
-        DocumentStatut.EnCorrectionSoumise => "Correction soumise — en attente de vérification",
+        DocumentStatut.EnAttente => "En attente — visible par l'encadrant",
+        DocumentStatut.TransmisAuCentre => "Transmis au Centre",
+        DocumentStatut.DemandeModification => "Modification demandée par le Centre",
+        DocumentStatut.EnCorrectionSoumise => "Correction soumise — en attente du Centre",
+        DocumentStatut.Valide => "Validé par le Centre",
+        DocumentStatut.Refuse => "Refusé par le Centre",
         _ => statut.ToString()
     };
 }

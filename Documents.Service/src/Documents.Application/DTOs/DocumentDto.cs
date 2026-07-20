@@ -18,6 +18,7 @@ public class DocumentDto
     public string ContentType { get; set; } = string.Empty;
     public DocumentStatut Statut { get; set; }
     public string StatutLibelle { get; set; } = string.Empty;
+    public string DestinataireActuel { get; set; } = "Encadrant";
     public int? VerificateurId { get; set; }
     public string? CommentaireVerificateur { get; set; }
     public DateTime DateDepot { get; set; }

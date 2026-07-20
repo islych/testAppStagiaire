@@ -205,41 +205,128 @@ public class CandidaturesApiService : ICandidaturesApiService
         }
     }
 
-    /// <summary>
-    /// Accepte une candidature
-    /// </summary>
-    public async Task<ApiResponse<CandidatureViewModel>> AcceptCandidatureAsync(Guid id, string token)
+    /// <summary>Encadrant transmet la candidature à la Direction</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> TransmettreADirectionAsync(Guid id, string token)
     {
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/accept");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/transmettre-direction");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
             var response = await _httpClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogWarning($"Erreur acceptation candidature {id} : {response.StatusCode}");
-                return new ApiResponse<CandidatureViewModel> { Success = false };
-            }
-
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            var apiResponse = JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(
-                jsonResponse,
-                JsonOptions);
-
-            return apiResponse ?? new ApiResponse<CandidatureViewModel> { Success = false };
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Erreur lors de l'acceptation de la candidature {id}");
+            _logger.LogError(ex, "Erreur transmission direction {Id}", id);
             return new ApiResponse<CandidatureViewModel> { Success = false };
         }
     }
 
-    /// <summary>
-    /// Refuse une candidature
-    /// </summary>
+    /// <summary>Direction transmet la candidature au Centre</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> TransmettreCentreAsync(Guid id, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/transmettre-centre");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.SendAsync(request);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur transmission centre {Id}", id);
+            return new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+    }
+
+    /// <summary>Centre transmet la candidature acceptée au RH</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> TransmettreRHAsync(Guid id, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/transmettre-rh");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.SendAsync(request);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur transmission RH {Id}", id);
+            return new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+    }
+
+    /// <summary>RH intègre le stagiaire dans le système</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> IntegrerStagiaireAsync(Guid id, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/integrer");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.SendAsync(request);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur intégration stagiaire {Id}", id);
+            return new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+    }
+
+    /// <summary>Direction accepte une candidature</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> AccepterParDirectionAsync(Guid id, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/accepter-direction");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.SendAsync(request);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur acceptation direction {Id}", id);
+            return new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+    }
+
+    /// <summary>Direction refuse une candidature</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> RefuserParDirectionAsync(Guid id, string motif, string token)
+    {
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/candidatures/{id}/refuser-direction");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(new { commentaire = motif }, JsonOptions),
+                System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.SendAsync(request);
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<ApiResponse<CandidatureViewModel>>(jsonResponse, JsonOptions)
+                   ?? new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur refus direction {Id}", id);
+            return new ApiResponse<CandidatureViewModel> { Success = false };
+        }
+    }
+
+    /// <summary>Accepte une candidature (compatibilité)</summary>
+    public async Task<ApiResponse<CandidatureViewModel>> AcceptCandidatureAsync(Guid id, string token)
+        => await TransmettreADirectionAsync(id, token);
+
+    /// <summary>Refuse une candidature</summary>
     public async Task<ApiResponse<CandidatureViewModel>> RejectCandidatureAsync(Guid id, string motif, string token)
     {
         try

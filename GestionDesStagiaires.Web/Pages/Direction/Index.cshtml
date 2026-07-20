@@ -1,0 +1,146 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Direction.IndexModel
+@{
+    ViewData["Title"] = "Espace Direction";
+}
+
+<div class="container-fluid py-4" style="max-width:1100px">
+    <h2 class="mb-1"><i class="bi bi-star text-warning"></i> Espace Direction</h2>
+    <p class="text-muted mb-4">Examinez et validez les accords de stage transmis par les encadrants</p>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle"></i> @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @{
+        var enAttente = Model.Candidatures.Where(c => c.Statut == "TransmiseADirection").ToList();
+        var traitees  = Model.Candidatures.Where(c => c.Statut != "TransmiseADirection").ToList();
+    }
+
+    @if (!enAttente.Any() && !traitees.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucune candidature transmise pour le moment.</p>
+        </div>
+    }
+
+    @if (enAttente.Any())
+    {
+        <h6 class="text-uppercase text-muted small mb-2">
+            <i class="bi bi-clock text-warning"></i> En attente de décision (@enAttente.Count)
+        </h6>
+        <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+            @foreach (var c in enAttente)
+            {
+                var nom = Model.NomsStagiaires.ContainsKey(c.StagiaireId) ? Model.NomsStagiaires[c.StagiaireId] : $"#{c.StagiaireId}";
+                <div class="col">
+                    <div class="card border-warning border-start border-3 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-0">@nom</h6>
+                                    <small class="text-muted">@c.DepartementNom / @c.SpecialiteNom</small>
+                                </div>
+                                <span class="badge bg-warning text-dark">Transmise</span>
+                            </div>
+                            <div class="row g-1 small text-muted mb-3">
+                                <div class="col-6"><i class="bi bi-mortarboard"></i> @c.NiveauEtude</div>
+                                <div class="col-6"><i class="bi bi-building2"></i> @c.Ecole</div>
+                                <div class="col-6"><i class="bi bi-hourglass"></i> @c.DureeStageMois mois</div>
+                                <div class="col-6"><i class="bi bi-calendar"></i> @c.DateCreation.ToString("dd/MM/yyyy")</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <form method="post" asp-page-handler="Accepter" class="flex-grow-1">
+                                    <input type="hidden" name="id" value="@c.Id">
+                                    <button type="submit" class="btn btn-success btn-sm w-100"
+                                            onclick="return confirm('Valider l\'accord de stage de @nom ?')">
+                                        <i class="bi bi-check-circle"></i> Valider l'accord de stage
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-danger btn-sm flex-grow-1"
+                                        onclick="ouvrirRefus('@c.Id', '@nom')"
+                                        data-bs-toggle="modal" data-bs-target="#modalRefus">
+                                    <i class="bi bi-x-circle"></i> Refuser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (traitees.Any())
+    {
+        <h6 class="text-uppercase text-muted small mb-2 mt-3">
+            <i class="bi bi-check2-all text-secondary"></i> Traitées (@traitees.Count)
+        </h6>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm align-middle">
+                <thead class="table-light">
+                    <tr><th>Stagiaire</th><th>Département</th><th>Statut</th><th>Date décision</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in traitees)
+                    {
+                        var nom = Model.NomsStagiaires.ContainsKey(c.StagiaireId) ? Model.NomsStagiaires[c.StagiaireId] : $"#{c.StagiaireId}";
+                        var badge = c.Statut == "Acceptee" ? "bg-success" : "bg-danger";
+                        var label = c.Statut == "Acceptee" ? "Acceptée" : "Refusée";
+                        <tr>
+                            <td><strong>@nom</strong></td>
+                            <td><small>@c.DepartementNom</small></td>
+                            <td><span class="badge @badge">@label</span></td>
+                            <td><small>@(c.DateDecision?.ToString("dd/MM/yyyy") ?? "—")</small></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Modal refus -->
+<div class="modal fade" id="modalRefus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Refuser">
+                <input type="hidden" name="id" id="refusId">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-x-circle"></i> Refuser la candidature</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Stagiaire : <strong id="refusNom"></strong></p>
+                    <label class="form-label fw-semibold">Motif du refus <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="CommentaireRefus" rows="3"
+                              placeholder="Expliquez le motif…" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirmer le refus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function ouvrirRefus(id, nom) {
+    document.getElementById('refusId').value = id;
+    document.getElementById('refusNom').textContent = nom;
+}
+</script>
+}

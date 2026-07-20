@@ -1,0 +1,181 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Candidatures.AccepteeModel
+
+@{
+    ViewData["Title"] = "Candidature Acceptée";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-check-circle-fill text-success"></i> Candidature Acceptée</h1>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    @if (Model.CandidatureAcceptee == null)
+    {
+        <div class="card border-warning shadow-sm mt-4">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+                <h4 class="mt-3">Aucune candidature acceptée</h4>
+                <p class="text-muted">Votre candidature n'a pas encore été acceptée par un encadrant.</p>
+                <a href="/candidatures" class="btn btn-outline-primary">Voir mes candidatures</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        var c = Model.CandidatureAcceptee;
+
+        <!-- Bannière succès -->
+        <div class="alert alert-success d-flex align-items-center gap-3 mt-3">
+            <i class="bi bi-envelope-check fs-3"></i>
+            <div>
+                <strong>Votre candidature a été acceptée !</strong>
+                Veuillez envoyer les documents requis ci-dessous. Un email de confirmation vous a été envoyé.
+            </div>
+        </div>
+
+        <!-- Info candidature -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> Détails du stage</h5>
+            </div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Département</small>
+                    <strong>@(c.DepartementNom ?? "—")</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Spécialité</small>
+                    <strong>@(c.SpecialiteNom ?? "—")</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Durée</small>
+                    <strong>@c.DureeStageMois mois</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents à fournir -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-check"></i> Documents à envoyer</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Les documents suivants sont requis. Déposez-les via la section Documents.</p>
+                <div class="row row-cols-2 row-cols-md-3 g-2" id="docRequisList">
+                    @foreach (var doc in new[] { "CV", "Convention de stage", "Attestation d'assurance", "CIN", "Demande manuscrite" })
+                    {
+                        <div class="col">
+                            <div class="card border h-100">
+                                <div class="card-body py-2 d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-pdf text-danger"></i>
+                                    <small>@doc</small>
+                                    <span class="ms-auto badge bg-secondary doc-status-badge" data-doctype="@doc">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Mes documents déposés -->
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-check"></i> Mes documents déposés</h5>
+                <a href="/documents" class="btn btn-sm btn-primary">
+                    <i class="bi bi-upload"></i> Déposer un document
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div id="docsLoading" class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm text-primary"></div>
+                </div>
+                <div id="docsEmpty" class="text-center py-4 text-muted d-none">
+                    <i class="bi bi-inbox"></i> Aucun document déposé pour le moment.
+                </div>
+                <table class="table table-hover mb-0 d-none" id="docsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Type</th>
+                            <th>Fichier</th>
+                            <th>Statut</th>
+                            <th>Commentaire</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="docsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+@if (Model.CandidatureAcceptee != null)
+{
+<script>
+    const API = '@Model.DocumentsApiUrl';
+    const TOKEN = '@Model.JwtToken';
+    const CANDIDATURE_ID = '@Model.CandidatureAcceptee?.Id';
+
+    const statusBadge = {
+        'EnAttente': '<span class="badge bg-warning text-dark">En attente</span>',
+        'Valide': '<span class="badge bg-success">Validé</span>',
+        'Refuse': '<span class="badge bg-danger">Refusé</span>',
+        'EnCorrectionSoumise': '<span class="badge bg-info">Correction soumise</span>',
+    };
+
+    async function chargerDocs() {
+        try {
+            const res = await fetch(`${API}/api/v1/documents/me`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            document.getElementById('docsLoading').classList.add('d-none');
+
+            if (!res.ok) { document.getElementById('docsEmpty').classList.remove('d-none'); return; }
+
+            const json = await res.json();
+            const docs = json.data ?? [];
+
+            if (docs.length === 0) { document.getElementById('docsEmpty').classList.remove('d-none'); return; }
+
+            const tbody = document.getElementById('docsBody');
+            tbody.innerHTML = '';
+            docs.forEach(doc => {
+                const date = new Date(doc.dateDepot).toLocaleDateString('fr-FR');
+                const badge = statusBadge[doc.statut] ?? `<span class="badge bg-secondary">${doc.statut}</span>`;
+                const commentaire = doc.commentaireVerificateur
+                    ? `<small class="text-danger" title="${doc.commentaireVerificateur}">${doc.commentaireVerificateur.substring(0, 40)}${doc.commentaireVerificateur.length > 40 ? '…' : ''}</small>`
+                    : '—';
+                tbody.innerHTML += `
+                <tr>
+                    <td><small>${doc.typeLibelle ?? doc.type}</small></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width:120px" title="${doc.nomFichier}">${doc.nomFichier}</small></td>
+                    <td>${badge}</td>
+                    <td>${commentaire}</td>
+                    <td><small>${date}</small></td>
+                    <td>
+                        <a href="${API}/api/v1/documents/${doc.id}/telecharger" target="_blank"
+                           class="btn btn-sm btn-outline-secondary" title="Télécharger">
+                            <i class="bi bi-download"></i>
+                        </a>
+                        ${doc.statut === 'Refuse' ? `<a href="/documents" class="btn btn-sm btn-outline-warning ms-1" title="Corriger"><i class="bi bi-arrow-repeat"></i></a>` : ''}
+                    </td>
+                </tr>`;
+            });
+            document.getElementById('docsTable').classList.remove('d-none');
+        } catch {
+            document.getElementById('docsLoading').classList.add('d-none');
+            document.getElementById('docsEmpty').classList.remove('d-none');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', chargerDocs);
+</script>
+}
+}

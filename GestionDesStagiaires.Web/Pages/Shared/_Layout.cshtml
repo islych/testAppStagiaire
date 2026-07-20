@@ -52,5 +52,38 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Stagiaire"))
+    {
+        <script>
+            // Polling léger pour le badge de notifications
+            async function refreshNotifBadge() {
+                const badge = document.getElementById('navNotifBadge');
+                if (!badge) return;
+                try {
+                    const notifApiUrl = '@(ViewData["NotificationsApiUrl"] ?? "http://localhost:5132")';
+                    const token = sessionStorage.getItem('jwtToken') || '';
+                    if (!token) return;
+                    const res = await fetch(`${notifApiUrl}/api/v1/notifications/me/count`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    const count = json.data ?? 0;
+                    if (count > 0) {
+                        badge.textContent = count > 9 ? '9+' : count;
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                } catch { /* service indisponible */ }
+            }
+            // Stocker le token en sessionStorage depuis le cookie de session si présent
+            document.addEventListener('DOMContentLoaded', () => {
+                refreshNotifBadge();
+                setInterval(refreshNotifBadge, 60000); // toutes les 60s
+            });
+        </script>
+    }
 </body>
 </html>

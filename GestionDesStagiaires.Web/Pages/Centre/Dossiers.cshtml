@@ -1,0 +1,125 @@
+@page
+@model GestionDesStagiaires.Web.Pages.Centre.DossiersModel
+@{
+    ViewData["Title"] = "Dossiers acceptés — Centre";
+}
+
+<div class="container-fluid py-4" style="max-width:1100px">
+    <h2 class="mb-1"><i class="bi bi-folder2-open text-primary"></i> Dossiers acceptés</h2>
+    <p class="text-muted mb-4">Stagiaires acceptés par le Centre avec leurs documents</p>
+
+    @if (!Model.Dossiers.Any())
+    {
+        <div class="card border-0 shadow-sm text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Aucun dossier accepté pour le moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="accordion" id="accordionDossiers">
+            @for (int i = 0; i < Model.Dossiers.Count; i++)
+            {
+                var d = Model.Dossiers[i];
+                <div class="accordion-item shadow-sm mb-2">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button @(i > 0 ? "collapsed" : "")"
+                                type="button" data-bs-toggle="collapse"
+                                data-bs-target="#dossier-@i"
+                                onclick="chargerDocs(@d.StagiaireId)">
+                            <div class="d-flex align-items-center gap-3 w-100">
+                                <i class="bi bi-person-circle fs-4 text-primary"></i>
+                                <div>
+                                    <strong>@d.NomComplet</strong>
+                                    <small class="text-muted d-block">@d.Email</small>
+                                </div>
+                                <span class="ms-auto me-3 text-muted small">@d.DepartementNom / @d.SpecialiteNom</span>
+                                <span class="badge bg-primary" id="docCount-@d.StagiaireId">…</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="dossier-@i" class="accordion-collapse collapse @(i == 0 ? "show" : "")">
+                        <div class="accordion-body p-0">
+                            <div id="docs-loading-@d.StagiaireId" class="text-center py-3 text-muted small">
+                                <div class="spinner-border spinner-border-sm"></div> Chargement…
+                            </div>
+                            <table class="table table-sm table-hover mb-0 d-none" id="docs-table-@d.StagiaireId">
+                                <thead class="table-light">
+                                    <tr><th>Type</th><th>Fichier</th><th>Statut</th><th>Date</th><th></th></tr>
+                                </thead>
+                                <tbody id="docs-body-@d.StagiaireId"></tbody>
+                            </table>
+                            <div id="docs-empty-@d.StagiaireId" class="text-center py-3 text-muted small d-none">
+                                <i class="bi bi-inbox"></i> Aucun document.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    const API   = '@Model.DocumentsApiUrl';
+    const TOKEN = '@Model.JwtToken';
+    const loaded = new Set();
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const first = document.querySelector('[id^="dossier-0"].show');
+        if (first) {
+            const btn = document.querySelector('[data-bs-target="#dossier-0"]');
+            const match = btn?.getAttribute('onclick')?.match(/\d+/);
+            if (match) chargerDocs(parseInt(match[0]));
+        }
+    });
+
+    async function chargerDocs(stagiaireId) {
+        if (loaded.has(stagiaireId)) return;
+        loaded.add(stagiaireId);
+
+        const loading = document.getElementById(`docs-loading-${stagiaireId}`);
+        const table   = document.getElementById(`docs-table-${stagiaireId}`);
+        const tbody   = document.getElementById(`docs-body-${stagiaireId}`);
+        const empty   = document.getElementById(`docs-empty-${stagiaireId}`);
+        const count   = document.getElementById(`docCount-${stagiaireId}`);
+
+        try {
+            const res = await fetch(`${API}/api/v1/documents/stagiaire/${stagiaireId}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            loading.classList.add('d-none');
+
+            if (!res.ok) { empty.classList.remove('d-none'); return; }
+            const json = await res.json();
+            const docs = json.data ?? [];
+
+            count.textContent = `${docs.length} doc${docs.length !== 1 ? 's' : ''}`;
+
+            if (!docs.length) { empty.classList.remove('d-none'); return; }
+
+            const badges = {
+                'EnAttente': '<span class="badge bg-warning text-dark">En attente</span>',
+                'Valide': '<span class="badge bg-success">Validé</span>',
+                'Refuse': '<span class="badge bg-danger">Refusé</span>',
+                'EnCorrectionSoumise': '<span class="badge bg-info">Correction</span>',
+            };
+
+            tbody.innerHTML = docs.map(d => `
+                <tr>
+                    <td><small>${d.typeLibelle ?? d.type}</small></td>
+                    <td><small class="text-truncate d-inline-block" style="max-width:130px" title="${d.nomFichier}">${d.nomFichier}</small></td>
+                    <td>${badges[d.statut] ?? `<span class="badge bg-secondary">${d.statut}</span>`}</td>
+                    <td><small>${new Date(d.dateDepot).toLocaleDateString('fr-FR')}</small></td>
+                    <td><a href="${API}/api/v1/documents/${d.id}/telecharger" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></td>
+                </tr>`).join('');
+
+            table.classList.remove('d-none');
+        } catch {
+            loading.classList.add('d-none');
+            empty.classList.remove('d-none');
+        }
+    }
+</script>
+}

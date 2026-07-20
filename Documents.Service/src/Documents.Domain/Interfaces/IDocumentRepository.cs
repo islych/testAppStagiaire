@@ -38,6 +38,9 @@ public interface IDocumentRepository
     /// <summary>Supprime un document</summary>
     Task<bool> DeleteAsync(Guid id);
 
-    /// <summary>Vérifie si un document existe</summary>
-    Task<bool> ExistsAsync(Guid id);
+    /// <summary>Récupère les documents destinés à un acteur précis (Encadrant ou Centre)</summary>
+    Task<IEnumerable<Document>> GetByDestinataireAsync(string destinataire);
+
+    /// <summary>Récupère les documents d'une candidature destinés à un acteur précis</summary>
+    Task<IEnumerable<Document>> GetByCandidatureAndDestinataireAsync(Guid candidatureId, string destinataire);
 }

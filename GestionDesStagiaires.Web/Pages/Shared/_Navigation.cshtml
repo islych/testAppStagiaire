@@ -3,49 +3,128 @@
         <a class="navbar-brand fw-bold" href="/">
             <i class="bi bi-mortarboard"></i> Gestion des Stagiaires
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    @* ── Dashboard commun ── *@
                     <li class="nav-item">
                         <a class="nav-link" href="/dashboard">
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/candidatures">
-                            <i class="bi bi-file-earmark"></i> Candidatures
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/documents">
-                            <i class="bi bi-file-pdf"></i> Documents
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" title="À venir">
-                            <i class="bi bi-briefcase"></i> Stages <span class="badge bg-info">Soon</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#" title="À venir">
-                            <i class="bi bi-bell"></i> Notifications <span class="badge bg-info">Soon</span>
-                        </a>
-                    </li>
+
+                    @* ── MENU STAGIAIRE ── *@
+                    @if (User.IsInRole("Stagiaire"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/candidatures">
+                                <i class="bi bi-file-earmark"></i> Mes candidatures
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/candidatures/acceptee">
+                                <i class="bi bi-check-circle"></i> Ma candidature acceptée
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/documents">
+                                <i class="bi bi-file-pdf"></i> Mes documents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="/notifications">
+                                <i class="bi bi-bell"></i> Notifications
+                                <span id="navNotifBadge"
+                                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"></span>
+                            </a>
+                        </li>
+                    }
+
+                    @* ── MENU ENCADRANT ── *@
+                    @if (User.IsInRole("Encadrant"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/encadrant">
+                                <i class="bi bi-file-earmark-check"></i> Candidatures
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/encadrant/stagiairesacceptes">
+                                <i class="bi bi-people"></i> Stagiaires acceptés
+                            </a>
+                        </li>
+                    }
+
+                    @* ── MENU ADMINISTRATEUR ── *@
+                    @if (User.IsInRole("Administrateur"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin">
+                                <i class="bi bi-shield-lock"></i> Administration
+                            </a>
+                        </li>
+                    }
+
+                    @* ── MENU DIRECTION ── *@
+                    @if (User.IsInRole("Direction"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/direction">
+                                <i class="bi bi-star"></i> Candidatures
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/direction/dossiers">
+                                <i class="bi bi-folder2-open"></i> Dossiers acceptés
+                            </a>
+                        </li>
+                    }
+
+                    @* ── MENU CENTRE ── *@
+                    @if (User.IsInRole("Centre"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/centre">
+                                <i class="bi bi-building"></i> Candidatures
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/centre/dossiers">
+                                <i class="bi bi-folder2-open"></i> Dossiers acceptés
+                            </a>
+                        </li>
+                    }
+
+                    @* ── MENU RH ── *@
+                    @if (User.IsInRole("RH"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/rh">
+                                <i class="bi bi-people"></i> Candidatures
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/rh/dossiers">
+                                <i class="bi bi-folder2-open"></i> Dossiers acceptés
+                            </a>
+                        </li>
+                    }
+
+                    @* ── Dropdown utilisateur ── *@
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> @(User.Identity.Name ?? "Utilisateur")
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            @if (User.IsInRole("Administrateur"))
-                            {
-                                <li><a class="dropdown-item" href="/admin"><i class="bi bi-shield-lock"></i> Administration</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                            }
-                            <li><a class="dropdown-item" href="/account/logout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                            <li><a class="dropdown-item" href="/account/logout">
+                                <i class="bi bi-box-arrow-right"></i> Déconnexion
+                            </a></li>
                         </ul>
                     </li>
                 }

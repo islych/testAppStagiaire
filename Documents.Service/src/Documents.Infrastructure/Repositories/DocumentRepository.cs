@@ -143,4 +143,28 @@ public class DocumentRepository : IDocumentRepository
             .AsNoTracking()
             .AnyAsync(d => d.Id == id);
     }
+
+    /// <summary>
+    /// Récupère les documents (version courante) destinés à un acteur précis
+    /// </summary>
+    public async Task<IEnumerable<Document>> GetByDestinataireAsync(string destinataire)
+    {
+        return await _context.Documents
+            .AsNoTracking()
+            .Where(d => d.DestinataireActuel == destinataire && d.EstVersionCourante)
+            .OrderByDescending(d => d.DateDepot)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Récupère les documents (version courante) d'une candidature pour un destinataire précis
+    /// </summary>
+    public async Task<IEnumerable<Document>> GetByCandidatureAndDestinataireAsync(Guid candidatureId, string destinataire)
+    {
+        return await _context.Documents
+            .AsNoTracking()
+            .Where(d => d.CandidatureId == candidatureId && d.DestinataireActuel == destinataire && d.EstVersionCourante)
+            .OrderByDescending(d => d.DateDepot)
+            .ToListAsync();
+    }
 }

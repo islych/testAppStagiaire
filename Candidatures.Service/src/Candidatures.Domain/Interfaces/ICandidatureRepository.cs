@@ -52,4 +52,9 @@ public interface ICandidatureRepository
     /// Récupère les candidatures assignées à un encadrant
     /// </summary>
     Task<IEnumerable<Candidature>> GetByEncadrantIdAsync(int encadrantId);
+
+    /// <summary>
+    /// Récupère les candidatures d'un département
+    /// </summary>
+    Task<IEnumerable<Candidature>> GetByDepartementIdAsync(int departementId);
 }

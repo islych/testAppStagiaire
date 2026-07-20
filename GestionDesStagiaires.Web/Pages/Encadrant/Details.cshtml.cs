@@ -88,24 +88,24 @@ public class DetailsModel : PageModel
                 return RedirectToPage("/Account/Login");
             }
 
-            _logger.LogInformation("Acceptation candidature {CandidatureId} par encadrant", id);
+            _logger.LogInformation("Transmission candidature {CandidatureId} à la Direction par encadrant", id);
 
-            var result = await _candidaturesService.AcceptCandidatureAsync(id, token);
+            var result = await _candidaturesService.TransmettreADirectionAsync(id, token);
 
             if (result.Success)
             {
-                TempData["SuccessMessage"] = "Candidature acceptée avec succès";
+                TempData["SuccessMessage"] = "Candidature transmise à la Direction avec succès.";
                 return RedirectToPage("/Encadrant/Index");
             }
 
-            TempData["ErrorMessage"] = result.Message ?? "Erreur lors de l'acceptation";
-            return RedirectToPage("/Encadrant/Details", new { id = id });
+            TempData["ErrorMessage"] = result.Message ?? "Erreur lors de la transmission";
+            return RedirectToPage("/Encadrant/Details", new { id });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de l'acceptation de candidature");
+            _logger.LogError(ex, "Erreur transmission à la Direction");
             TempData["ErrorMessage"] = "Une erreur est survenue";
-            return RedirectToPage("/Encadrant/Details", new { id = id });
+            return RedirectToPage("/Encadrant/Details", new { id });
         }
     }
 

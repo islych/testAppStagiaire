@@ -120,6 +120,7 @@
                     var statusBadge = Model.Candidature.Statut switch
                     {
                         "EnAttente" => "bg-warning",
+                        "TransmiseADirection" => "bg-info",
                         "Acceptee" => "bg-success",
                         "Refusee" => "bg-danger",
                         _ => "bg-secondary"
@@ -128,6 +129,7 @@
                     var statusLabel = Model.Candidature.Statut switch
                     {
                         "EnAttente" => "En attente",
+                        "TransmiseADirection" => "Transmise à la Direction",
                         "Acceptee" => "Acceptée",
                         "Refusee" => "Refusée",
                         _ => Model.Candidature.Statut
@@ -201,26 +203,25 @@
         {
             <div class="card border-primary mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-pencil-square"></i> Décision
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Décision</h5>
                 </div>
                 <div class="card-body">
                     <p class="text-muted mb-3">
-                        <i class="bi bi-info-circle"></i> Cette candidature est en attente de votre décision.
+                        <i class="bi bi-info-circle"></i>
+                        Transmettez cette candidature à la Direction pour validation finale, ou refusez-la directement.
                     </p>
-
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <form method="post" asp-page-handler="Accept" class="d-inline">
-                                <button type="submit" class="btn btn-success btn-lg w-100" 
-                                        onclick="return confirm('Êtes-vous sûr de vouloir accepter cette candidature ?');">
-                                    <i class="bi bi-check-circle"></i> Accepter
+                            <form method="post" asp-page-handler="Accept">
+                                <button type="submit" class="btn btn-success btn-lg w-100"
+                                        onclick="return confirm('Transmettre cette candidature à la Direction ?')">
+                                    <i class="bi bi-send"></i> Transmettre à la Direction
                                 </button>
                             </form>
                         </div>
                         <div class="col-md-6">
-                            <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <button type="button" class="btn btn-danger btn-lg w-100"
+                                    data-bs-toggle="modal" data-bs-target="#rejectModal">
                                 <i class="bi bi-x-circle"></i> Refuser
                             </button>
                         </div>
@@ -228,11 +229,17 @@
                 </div>
             </div>
         }
-        else
+        else if (Model.Candidature.Statut == "TransmiseADirection")
         {
             <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> 
-                Cette candidature a déjà été traitée et ne peut plus être modifiée.
+                <i class="bi bi-hourglass-split"></i>
+                Candidature transmise à la Direction. En attente de leur décision.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-secondary">
+                <i class="bi bi-info-circle"></i> Cette candidature a déjà été traitée.
             </div>
         }
     }

@@ -175,20 +175,53 @@ public class DocumentsController : ControllerBase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // VALIDER
+    // TRANSMETTRE AU CENTRE
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Valide un document (Encadrant / RH / Centre)
+    /// L'encadrant transmet tous les documents en attente d'une candidature au Centre.
     /// </summary>
-    /// <param name="id">ID du document</param>
-    /// <param name="dto">Commentaire optionnel</param>
-    /// <returns>Document validé</returns>
-    /// <response code="200">Document validé</response>
-    /// <response code="400">Transition de statut invalide</response>
-    /// <response code="404">Document introuvable</response>
+    [HttpPost("candidature/{candidatureId:guid}/transmettre-centre")]
+    [Authorize(Roles = "Encadrant")]
+    [ProducesResponseType(typeof(ApiResponse<IEnumerable<DocumentDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> TransmettreAuCentre(Guid candidatureId)
+    {
+        try
+        {
+            var encadrantId = GetCurrentUserId();
+            if (encadrantId == null)
+                return Unauthorized(Erreur("Identifiant de l'encadrant invalide."));
+
+            _logger.LogInformation(
+                "Transmission au Centre des documents candidature {CandidatureId} par encadrant {EncadrantId}",
+                candidatureId, encadrantId);
+
+            var documents = await _service.TransmettreAuCentreAsync(candidatureId, encadrantId.Value);
+
+            return Ok(Succes("Documents transmis au Centre avec succès.", documents));
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogWarning("Erreur transmission au Centre : {Message}", ex.Message);
+            return BadRequest(Erreur(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur serveur lors de la transmission au Centre");
+            return StatusCode(500, Erreur("Erreur serveur."));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // VALIDER (Centre uniquement)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Valide un document (Centre uniquement — document doit être TransmisAuCentre ou EnCorrectionSoumise)
+    /// </summary>
     [HttpPost("{id:guid}/valider")]
-    [Authorize(Roles = "Encadrant,RH,Centre")]
+    [Authorize(Roles = "Centre,Administrateur")]
     [ProducesResponseType(typeof(ApiResponse<DocumentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
@@ -204,7 +237,8 @@ public class DocumentsController : ControllerBase
                 "Validation du document {DocumentId} par le vérificateur {VerificateurId}",
                 id, verificateurId);
 
-            var document = await _service.ValiderDocumentAsync(id, verificateurId.Value, dto.Commentaire);
+            var document = await _service.ValiderDocumentAsync(id, verificateurId.Value, dto.Commentaire,
+                Request.Headers["Authorization"].ToString().Replace("Bearer ", "").Trim());
 
             return Ok(Succes("Document validé avec succès.", document));
         }
@@ -225,20 +259,14 @@ public class DocumentsController : ControllerBase
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // REFUSER
+    // REFUSER (Centre uniquement)
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Refuse un document avec un motif obligatoire (Encadrant / RH / Centre)
+    /// Refuse définitivement un document (Centre uniquement)
     /// </summary>
-    /// <param name="id">ID du document</param>
-    /// <param name="dto">Motif du refus (obligatoire)</param>
-    /// <returns>Document refusé</returns>
-    /// <response code="200">Document refusé</response>
-    /// <response code="400">Motif manquant ou transition invalide</response>
-    /// <response code="404">Document introuvable</response>
     [HttpPost("{id:guid}/refuser")]
-    [Authorize(Roles = "Encadrant,RH,Centre")]
+    [Authorize(Roles = "Centre,Administrateur")]
     [ProducesResponseType(typeof(ApiResponse<DocumentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
@@ -270,6 +298,91 @@ public class DocumentsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erreur serveur lors du refus");
+            return StatusCode(500, Erreur("Erreur serveur."));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SUPPRIMER
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Supprime un document en attente (Stagiaire propriétaire uniquement)
+    /// </summary>
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Stagiaire")]
+    public async Task<IActionResult> Supprimer(Guid id)
+    {
+        try
+        {
+            var stagiaireId = GetCurrentUserId();
+            if (stagiaireId == null)
+                return Unauthorized(Erreur("Identifiant invalide."));
+
+            await _service.SupprimerDocumentAsync(id, stagiaireId.Value);
+
+            return Ok(new { success = true, message = "Document supprimé." });
+        }
+        catch (DocumentNotFoundException)
+        {
+            return NotFound(Erreur($"Document {id} introuvable."));
+        }
+        catch (ApplicationException ex)
+        {
+            return BadRequest(Erreur(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur suppression document {Id}", id);
+            return StatusCode(500, Erreur("Erreur serveur."));
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DEMANDER MODIFICATION (Centre uniquement)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Le Centre demande des modifications sur un document.
+    /// Met le document en statut DemandeModification et notifie le stagiaire.
+    /// La correction soumise par le stagiaire ira directement au Centre.
+    /// </summary>
+    [HttpPost("{id:guid}/demander-modification")]
+    [Authorize(Roles = "Centre,Administrateur")]
+    [ProducesResponseType(typeof(ApiResponse<DocumentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DemanderModification(Guid id, [FromBody] DemanderCorrectionDto dto)
+    {
+        try
+        {
+            var centreUserId = GetCurrentUserId();
+            if (centreUserId == null)
+                return Unauthorized(Erreur("Identifiant invalide."));
+
+            if (string.IsNullOrWhiteSpace(dto.Commentaire))
+                return BadRequest(Erreur("Un commentaire est obligatoire pour demander une modification."));
+
+            _logger.LogInformation(
+                "Demande de modification sur document {DocumentId} par Centre {UserId}",
+                id, centreUserId);
+
+            var document = await _service.DemanderModificationAsync(id, centreUserId.Value, dto.Commentaire);
+
+            return Ok(Succes("Modification demandée. Le stagiaire a été notifié.", document));
+        }
+        catch (DocumentNotFoundException)
+        {
+            return NotFound(Erreur($"Document {id} introuvable."));
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogWarning("Erreur demande modification : {Message}", ex.Message);
+            return BadRequest(Erreur(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur serveur lors de la demande de modification");
             return StatusCode(500, Erreur("Erreur serveur."));
         }
     }
@@ -345,7 +458,7 @@ public class DocumentsController : ControllerBase
     /// <returns>Documents du stagiaire</returns>
     /// <response code="200">Documents récupérés</response>
     [HttpGet("stagiaire/{stagiaireId:int}")]
-    [Authorize(Roles = "Encadrant,RH,Centre,Administrateur")]
+    [Authorize(Roles = "Encadrant,RH,Centre,Direction,Administrateur")]
     [ProducesResponseType(typeof(ApiResponse<IEnumerable<DocumentDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetByStagiaire(int stagiaireId)
     {

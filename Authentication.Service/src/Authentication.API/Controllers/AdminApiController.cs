@@ -40,6 +40,7 @@ namespace Authentication.API.Controllers
                         u.Prenom,
                         u.Email,
                         Role = u.Role!.Nom,
+                        u.DepartementId,
                         u.Statut,
                         u.DateCreation
                     })
@@ -142,6 +143,7 @@ namespace Authentication.API.Controllers
                     Email = request.Email,
                     MotDePasseHash = BCrypt.Net.BCrypt.HashPassword(motDePasseTemp),
                     RoleId = request.RoleId,
+                    DepartementId = role.Nom == "Encadrant" ? request.DepartementId : null,
                     Statut = true,
                     DateCreation = DateTime.Now
                 };
@@ -299,5 +301,5 @@ namespace Authentication.API.Controllers
         }
     }
 
-    public record CreateUserRequest(string Nom, string Prenom, string Email, int RoleId);
+    public record CreateUserRequest(string Nom, string Prenom, string Email, int RoleId, int? DepartementId = null);
 }
